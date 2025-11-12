@@ -30,7 +30,7 @@ namespace NBC.ActionEditor
             var rect = new Rect(0, 0, Styles.TimelineLeftWidth, Styles.PlayControlHeight);
             GUILayout.BeginArea(rect);
 
-            _buttonWidth = rect.width / 7;
+            _buttonWidth = rect.width / 8;
 
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
 

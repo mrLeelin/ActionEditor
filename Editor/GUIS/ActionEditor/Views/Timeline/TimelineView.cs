@@ -31,12 +31,13 @@ namespace NBC.ActionEditor
         public override void OnDraw()
         {
             asset.UpdateMaxTime();
-
+            
+            
             var headRect = new Rect(0, 0, Position.width, Styles.PlayControlHeight);
             GUILayout.BeginArea(headRect, EditorStyles.helpBox);
             _headerView.OnGUI(new Rect(0, 0, headRect.width, headRect.height));
             GUILayout.EndArea();
-
+        
 
             App.Width = Styles.TimelineRightWidth;
             DoZoomAndPan();
