@@ -49,8 +49,74 @@ namespace NBC.ActionEditor
             var stepRect = new Rect(Position.x, Position.y + (Styles.HeaderHeight - 4), x, 4);
             GUI.color = Styles.TimeStepRectColor;
             GUI.DrawTexture(stepRect, Styles.WhiteTexture);
-            GUI.color = Color.white;
+            GUI.color = Color.yellow;
 
+
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            {
+                DrawTimeStep_Frames();
+            }
+            else
+            {
+                DrawTimeStep_Seconds();
+            }
+        }
+
+        private void DrawTimeStep_Frames()
+        {
+            var width = App.Width;
+            var frameRate = Prefs.FrameRate;
+
+            var frameInfoInterval = 1000000;
+            var lowMod = 1;
+            var modulos = new[] { 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000 };
+
+            var viewTimeInFrames = asset.ViewTime * frameRate;
+
+            for (var i = 0; i < modulos.Length; i++)
+            {
+                var count = viewTimeInFrames / modulos[i];
+                if (width / count > 50)
+                {
+                    frameInfoInterval = modulos[i];
+                    lowMod = i > 0 ? modulos[i - 1] : lowMod;
+                    break;
+                }
+            }
+
+            var frameStep = lowMod;
+            var frameInfoStart =
+                Mathf.FloorToInt(asset.ViewTimeMin * frameRate / frameInfoInterval) * frameInfoInterval;
+            var frameInfoEnd = Mathf.CeilToInt(asset.ViewTimeMax * frameRate / frameInfoInterval) * frameInfoInterval;
+
+            if (width / (viewTimeInFrames / frameStep) > 6)
+            {
+                for (var i = frameInfoStart; i <= frameInfoEnd; i += frameStep)
+                {
+                    var time = i / (float)frameRate;
+                    var posX = asset.TimeToPos(time, width);
+                    if (posX > Position.width) continue;
+                    GUI.DrawTexture(new Rect(posX, Position.y + (Styles.HeaderHeight - 4), 1, 4), Styles.WhiteTexture);
+                }
+            }
+
+            for (var i = frameInfoStart; i <= frameInfoEnd; i += frameInfoInterval)
+            {
+                var time = i / (float)frameRate;
+                var posX = asset.TimeToPos(time, width);
+                if (posX > Position.width) continue;
+                GUI.DrawTexture(new Rect(posX, Position.y + (Styles.HeaderHeight - 12), 1, 12), Styles.WhiteTexture);
+
+                var text = i.ToString();
+                var size = GUI.skin.label.CalcSize(new GUIContent(text));
+                var stampRect = new Rect(posX, 0, size.x, size.y);
+                GUI.Box(stampRect, text, GUI.skin.label);
+            }
+        }
+
+        private void DrawTimeStep_Seconds()
+        {
+            var width = App.Width;
 
             var timeInfoInterval = 1000000f;
             var lowMod = 0.01f;
@@ -120,7 +186,7 @@ namespace NBC.ActionEditor
                 GUI.DrawTexture(_playPointerHandler, Styles.TimelineTimeCursorIcon);
                 GUI.DrawTexture(new Rect(playX, Position.y, 1, Position.height), Styles.WhiteTexture);
             }
-            
+
 
             DrawRangeLine();
             DrawDragLine();
