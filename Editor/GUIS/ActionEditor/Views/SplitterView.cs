@@ -10,10 +10,10 @@ namespace NBC.ActionEditor
         public float Width;
         private float _minWidth;
 
-        public float OnSplit(Rect rect, float width, float minWidth = 220)
+        public float OnSplit(Rect rect, float width)
         {
             Width = width;
-            _minWidth = minWidth;
+            _minWidth = Styles.TimelineLeftWidthMin;
             OnGUI(rect);
             return Width;
         }

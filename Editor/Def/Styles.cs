@@ -50,6 +50,7 @@ namespace NBC.ActionEditor
         public static Color ClipBlendColor = new Color(144 / 255f, 144 / 255f, 144 / 255f, 0.5f);
 
         public static Color ClipSelectColor = Color.white;
+        
 
         public static GUIStyle HeaderBoxStyle => _headerBoxStyle != null
             ? _headerBoxStyle
@@ -73,6 +74,9 @@ namespace NBC.ActionEditor
 
         public const int BottomHeight = 16;
 
+        public const int HeadBtnMaxWidth = 300;
+
+        public const int TimelineLeftWidthMin = 220;
 
         public static float TimelineLeftWidth
         {

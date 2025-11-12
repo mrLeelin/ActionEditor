@@ -14,7 +14,8 @@ namespace NBC.ActionEditor
     }
 
     public class TimelinePointerView : ViewBase, IPointerClickHandler,
-        IPointerDragHandler, IDragBeginHandler, IDragEndHandler
+        IPointerDragHandler, IDragBeginHandler, IDragEndHandler,
+        IPointerDownHandler
     {
         public Asset asset => App.AssetData;
 
@@ -176,13 +177,13 @@ namespace NBC.ActionEditor
             GUI.DrawTexture(new Rect(x - 2, Position.y, 5, height), Styles.WhiteTexture);
             GUI.DrawTexture(new Rect(x, Position.y, 1, Position.height), Styles.WhiteTexture);
             GUI.color = Color.white;
-
+            _pointerTextRect = new Rect(Position.x, Position.y, width, height);
+            
             if (App.IsPlay)
             {
                 var playX = asset.TimeToPos(AssetPlayer.Inst.CurrentTime, width);
                 _playPointerHandler = new Rect(playX - 5, Position.y, 11, height);
-                _pointerTextRect = new Rect(Position.x, Position.y, width, height);
-
+                
                 GUI.DrawTexture(_playPointerHandler, Styles.TimelineTimeCursorIcon);
                 GUI.DrawTexture(new Rect(playX, Position.y, 1, Position.height), Styles.WhiteTexture);
             }
@@ -291,7 +292,13 @@ namespace NBC.ActionEditor
                 ChangeCurrentTime(eventData.MousePosition);
             }
         }
-
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (_pointerTextRect.Contains(eventData.MousePosition))
+            {
+                ChangeCurrentTime(eventData.MousePosition);
+            }
+        }
         public void OnDragBegin(PointerEventData eventData)
         {
             if (_playPointerHandler.Contains(eventData.MousePosition))
@@ -330,5 +337,7 @@ namespace NBC.ActionEditor
         }
 
         #endregion
+
+      
     }
 }

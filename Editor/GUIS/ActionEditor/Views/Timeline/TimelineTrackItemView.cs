@@ -207,7 +207,9 @@ namespace NBC.ActionEditor
             }
             else
             {
+                /*
                 App.Select(Data);
+                */
                 App.Repaint();
             }
         }

@@ -30,7 +30,9 @@ namespace NBC.ActionEditor
             var rect = new Rect(0, 0, Styles.TimelineLeftWidth, Styles.PlayControlHeight);
             GUILayout.BeginArea(rect);
 
-            _buttonWidth = rect.width / 8;
+
+            var btnMaxWidth = Mathf.Clamp(rect.width, 0, Styles.HeadBtnMaxWidth);
+            _buttonWidth = btnMaxWidth / 8;
 
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
