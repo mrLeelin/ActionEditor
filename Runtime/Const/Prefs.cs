@@ -177,6 +177,19 @@ namespace NBC.ActionEditor
         }
 
 
+
+        private static void InitSnapIntervals()
+        {
+            if (data.TimeStepMode == Prefs.TimeStepMode.Seconds)
+            {
+                Prefs.SnapInterval = data.SnapInterval;
+            }
+            else
+            {
+                Prefs.FrameRate = data.FrameRate;
+            }
+        }
+        
         public static readonly Dictionary<string, Type> AssetTypes = new Dictionary<string, Type>();
         public static readonly List<string> AssetNames = new List<string>();
 
@@ -191,6 +204,8 @@ namespace NBC.ActionEditor
                 AssetTypes[typeName] = t;
                 AssetNames.Add(typeName);
             }
+
+            InitSnapIntervals();
         }
 
         public static string GetAssetTypeName(Type type)

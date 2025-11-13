@@ -54,6 +54,11 @@ namespace NBC.ActionEditor
             get => currentTime;
             set => currentTime = Mathf.Clamp(value, 0, Length);
         }
+
+        public int CurrentFrame => Mathf.FloorToInt(currentTime * Prefs.FrameRate);
+
+
+        public int LengthInFrames => Mathf.FloorToInt(Length * Prefs.FrameRate);
         
         public float Length
         {
@@ -67,6 +72,8 @@ namespace NBC.ActionEditor
                 return 0;
             }
         }
+        
+        
 
         public void Sample()
         {

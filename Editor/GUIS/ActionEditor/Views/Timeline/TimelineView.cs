@@ -24,8 +24,6 @@ namespace NBC.ActionEditor
             _middleView = Window.CreateView<TimelineMiddleView>();
             _pointerView = Window.CreateView<TimelinePointerView>();
             _bottomView = Window.CreateView<TimelineBottomView>();
-
-            Prefs.SnapInterval = 0.01f;
         }
 
         public override void OnDraw()

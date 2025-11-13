@@ -1,5 +1,7 @@
-﻿using UnityEditor;
+﻿using System.Globalization;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering.VirtualTexturing;
 
 namespace NBC.ActionEditor
 {
@@ -11,6 +13,15 @@ namespace NBC.ActionEditor
 
             DrawNowAssetName();
             DrawAssetsHeader();
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            {
+                DrawCurrentTime();
+            }
+            else
+            {
+                DrawCurrentFrame();
+            }
+
             GUILayout.FlexibleSpace();
 
             DrawToolbarRight();
@@ -18,11 +29,13 @@ namespace NBC.ActionEditor
             GUILayout.EndHorizontal();
         }
 
+
         protected virtual void DrawAssetsHeader()
         {
-            if (App.AssetData == null) return;
+            if (App.AssetData == null) ;
             var customAssetHeader = EditorCustomFactory.GetHeader(App.AssetData);
-            customAssetHeader?.OnGUI();
+            if (customAssetHeader == null) return;
+            customAssetHeader.OnGUI();
         }
 
         protected virtual void DrawNowAssetName()
@@ -36,6 +49,53 @@ namespace NBC.ActionEditor
                 App.AutoSave();
                 ObjectSelectorWindow.ShowObjectPicker<TextAsset>(null, App.OnObjectPickerConfig, "Assets/");
             }
+        }
+
+
+        private void DrawCurrentFrame()
+        {
+            if (App.AssetData == null)
+            {
+                return;
+            }
+            var currentTime = AssetPlayer.Inst.CurrentFrame;
+            var maxTime = AssetPlayer.Inst.LengthInFrames;
+            GUI.color = Color.white;
+            GUI.skin.label.richText = true;
+            EditorGUILayout.BeginHorizontal();
+            var currentTimeStr = currentTime.ToString(CultureInfo.InvariantCulture);
+
+            GUILayout.Label(currentTimeStr, GUI.skin.textField,
+                GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(currentTimeStr)).x + 8));
+            GUILayout.Label("/");
+            var maxTimeStr = maxTime.ToString(CultureInfo.InvariantCulture);
+            GUILayout.Label(maxTimeStr, GUI.skin.textField,
+                GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(maxTimeStr)).x + 8));
+            EditorGUILayout.EndHorizontal();
+        }
+        private void DrawCurrentTime()
+        {
+            if (App.AssetData == null)
+            {
+                return;
+            }
+
+            var assets = App.AssetData;
+            var currentTime = AssetPlayer.Inst.CurrentTime;
+            if (Mathf.Approximately(currentTime, 0f)) currentTime = 0f;
+            var maxTime = assets.Length;
+            GUI.color = Color.white;
+            GUI.skin.label.richText = true;
+            EditorGUILayout.BeginHorizontal();
+            var currentTimeStr = currentTime.ToString(CultureInfo.InvariantCulture);
+
+            GUILayout.Label(currentTimeStr, GUI.skin.textField,
+                GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(currentTimeStr)).x + 8));
+            GUILayout.Label("/");
+            var maxTimeStr = maxTime.ToString(CultureInfo.InvariantCulture);
+            GUILayout.Label(maxTimeStr, GUI.skin.textField,
+                GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(maxTimeStr)).x + 8));
+            EditorGUILayout.EndHorizontal();
         }
 
 
@@ -63,7 +123,7 @@ namespace NBC.ActionEditor
             {
                 PreferencesWindow.Show(new Rect(Styles.ScreenWidth - 5 - 400 - Styles.TimelineLeftTotalWidth, 25, 400,
                     Styles.ScreenHeight - 70));
-                
+
                 // PreferencesWindow.Show(new Rect(G.ScreenWidth - 5 - 400, Styles.TOOLBAR_HEIGHT + 5, 400,
                 //     G.ScreenHeight - Styles.TOOLBAR_HEIGHT - 50));
             }
