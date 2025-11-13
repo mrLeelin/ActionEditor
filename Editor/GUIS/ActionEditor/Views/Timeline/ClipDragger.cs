@@ -199,7 +199,6 @@ namespace NBC.ActionEditor
             }
             else
             {
-                Debug.LogError($"dragType={dragType}");
                 OnBeginDragLength(eventData, stretchClip, dragType == ItemDragType.StretchStart);
             }
         }
@@ -543,7 +542,15 @@ namespace NBC.ActionEditor
                 }
             }
 
-            magnetSnapInterval = App.AssetData.ViewTime * 0.01f;
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            {
+                magnetSnapInterval = App.AssetData.ViewTime * 0.01f;
+            }
+            else
+            {
+                magnetSnapInterval = Mathf.FloorToInt(1f / Prefs.FrameRate);
+            }
+           
             magnetSnapTimesCache = result.Distinct().ToArray();
             // Debug.LogError($"缓存磁吸结果={magnetSnapTimesCache.Length}");
         }

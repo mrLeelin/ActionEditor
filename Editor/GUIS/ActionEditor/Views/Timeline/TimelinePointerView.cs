@@ -255,7 +255,17 @@ namespace NBC.ActionEditor
                 DrawTools.DrawDashedLine(x, Position.y, Position.y + Position.height, color);
             }
 
-            var text = time.ToString("0.00");
+            string text;
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            {
+                text = Mathf.FloorToInt(time * Prefs.FrameRate).ToString();
+            }
+            else
+            {
+                text = time.ToString("0.00");
+            }
+            
+            
             var size = GUI.skin.label.CalcSize(new GUIContent(text));
             var width = size.x + 5;
 
