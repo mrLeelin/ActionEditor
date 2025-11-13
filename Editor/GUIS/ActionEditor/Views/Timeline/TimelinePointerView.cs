@@ -20,6 +20,7 @@ namespace NBC.ActionEditor
         protected override void OnInit()
         {
             base.OnInit();
+            AssetPlayer.Inst.PointerDragType = PointerDragType.None;
         }
 
 
@@ -30,6 +31,7 @@ namespace NBC.ActionEditor
             DrawTimeStep();
             DrawPointer();
             CheckDrag();
+            ResetPointerDragType();
         }
 
         #region Time Step
@@ -283,6 +285,15 @@ namespace NBC.ActionEditor
 
         #region Drag
 
+        private void ResetPointerDragType()
+        {
+            var e = Event.current;
+            if (e.type == EventType.MouseUp)
+            {
+                AssetPlayer.Inst.PointerDragType = PointerDragType.None;
+            }
+        }
+
         private void CheckDrag()
         {
             asset.PosToTime(0, App.Width);
@@ -300,6 +311,7 @@ namespace NBC.ActionEditor
             if (_pointerTextRect.Contains(eventData.MousePosition))
             {
                 ChangeCurrentTime(eventData.MousePosition);
+                AssetPlayer.Inst.PointerDragType = PointerDragType.Play;
             }
         }
         public void OnDragBegin(PointerEventData eventData)
