@@ -122,6 +122,7 @@ namespace NBC.ActionEditor
         public static string Rename = "重命名";
 
         //**********  Header *********
+        public static string SelectSceneGameObject = "场景中的对象:";
         public static string HeaderLastSaveTime = "最后保存时间：{0}";
         public static string HeaderSelectAsset = "选中：[{0}]";
         public static string OpenPreferencesTips = "打开首选项界面";

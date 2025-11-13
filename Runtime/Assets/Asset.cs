@@ -10,13 +10,24 @@ namespace NBC.ActionEditor
     public abstract class Asset : IDirector
     {
         [HideInInspector] public List<Group> groups = new();
-        [SerializeField] private float length = 5f;
+        
+      
+        
+        [SerializeField] private float length;
         [SerializeField] private float viewTimeMin;
-        [SerializeField] private float viewTimeMax = 5f;
+        [SerializeField] private float viewTimeMax;
 
         [SerializeField] private float rangeMin;
-        [SerializeField] private float rangeMax = 5f;
+        [SerializeField] private float rangeMax ;
+        
 
+        private float _previewLength = 5f;
+        private float _previewTimeMin;
+        private float _previewTimeMax = 5f;
+        
+        private float _previewRangeMin;
+        private float _previewRangeMax = 5f;
+        
         public Asset()
         {
             Init();
@@ -27,23 +38,24 @@ namespace NBC.ActionEditor
 
         public float Length
         {
-            get => length;
-            set => length = Mathf.Max(value, 0.1f);
+            get => _previewLength;
+            set => _previewLength = Mathf.Max(value, 0.1f);
         }
 
         public float ViewTimeMin
         {
-            get => viewTimeMin;
+            get => _previewTimeMin;
             set
             {
-                if (ViewTimeMax > 0) viewTimeMin = Mathf.Min(value, ViewTimeMax - 0.25f);
+                if (ViewTimeMax > 0) _previewTimeMin = Mathf.Min(value, ViewTimeMax - 0.25f);
+                _previewTimeMin = Math.Max(0, value);
             }
         }
 
         public float ViewTimeMax
         {
-            get => viewTimeMax;
-            set => viewTimeMax = Mathf.Max(value, ViewTimeMin + 0.25f, 0);
+            get => _previewTimeMax;
+            set => _previewTimeMax = Mathf.Max(value, ViewTimeMin + 0.25f, 0);
         }
 
 
@@ -51,21 +63,21 @@ namespace NBC.ActionEditor
 
         public float RangeMin
         {
-            get => rangeMin;
+            get => _previewRangeMin;
             set
             {
-                rangeMin = value;
-                if (rangeMin < 0) rangeMin = 0;
+                _previewRangeMin = value;
+                if (_previewRangeMin < 0) _previewRangeMin = 0;
             }
         }
 
         public float RangeMax
         {
-            get => rangeMax;
+            get => _previewRangeMax;
             set
             {
-                rangeMax = value;
-                if (rangeMax < length) rangeMax = length;
+                _previewRangeMax = value;
+                if (_previewRangeMax < _previewLength) _previewRangeMax = _previewLength;
             }
         }
 
@@ -183,6 +195,22 @@ namespace NBC.ActionEditor
                 foreach (var d in directables)
                     d.OnBeforeSerialize();
 
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            {
+                length = Length;
+                viewTimeMin = ViewTimeMin;
+                viewTimeMax = ViewTimeMax;
+                rangeMin = RangeMin;
+                rangeMax = RangeMax;
+            }
+            else
+            {
+                length = Mathf.FloorToInt(Length * Prefs.FrameRate);
+                viewTimeMin = Mathf.FloorToInt(ViewTimeMin * Prefs.FrameRate);
+                viewTimeMax = Mathf.FloorToInt(ViewTimeMax * Prefs.FrameRate);
+                rangeMin = Mathf.FloorToInt(RangeMin * Prefs.FrameRate);
+                rangeMax = Mathf.FloorToInt(RangeMax * Prefs.FrameRate);
+            }
             // groupStr = FullSerializerExtensions.Serialize(typeof(List<Group>), groups);
         }
 

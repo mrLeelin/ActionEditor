@@ -51,6 +51,7 @@
         public static string Save = "Save";
 
         //**********  Header *********
+        public static string SelectSceneGameObject = "场景中的对象:";
         public static string HeaderLastSaveTime = "Last save time：{0}";
         public static string HeaderSelectAsset = "Select：[{0}]";
         public static string OpenPreferencesTips = "Open Preferences";

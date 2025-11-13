@@ -54,6 +54,8 @@ namespace NBC.ActionEditor
         public Asset Asset => App.AssetData;
         
         public PointerDragType PointerDragType { get; set; } = PointerDragType.None;
+        
+        public GameObject SelectSceneGameObject { get; set; }
 
         /// <summary>
         /// 当前时间
@@ -81,8 +83,11 @@ namespace NBC.ActionEditor
                 return 0;
             }
         }
-        
-        
+
+        public bool ExitSelectGameObjectInPreview()
+        {
+            return  SelectSceneGameObject != null;
+        }
 
         public void Sample()
         {

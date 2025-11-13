@@ -45,7 +45,7 @@ namespace NBC.ActionEditor
             var stepRect = new Rect(Position.x, Position.y + (Styles.HeaderHeight - 4), x, 4);
             GUI.color = Styles.TimeStepRectColor;
             GUI.DrawTexture(stepRect, Styles.WhiteTexture);
-            GUI.color = Color.yellow;
+            GUI.color = Color.white;
 
 
             if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
@@ -288,7 +288,7 @@ namespace NBC.ActionEditor
         private void ResetPointerDragType()
         {
             var e = Event.current;
-            if (e.type == EventType.MouseUp)
+            if (e.type is EventType.MouseUp or EventType.Used)
             {
                 AssetPlayer.Inst.PointerDragType = PointerDragType.None;
             }

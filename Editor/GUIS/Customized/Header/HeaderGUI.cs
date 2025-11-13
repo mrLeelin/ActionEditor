@@ -22,6 +22,7 @@ namespace NBC.ActionEditor
                 DrawCurrentFrame();
             }
 
+            DrawSelectSceneGameObject();
             GUILayout.FlexibleSpace();
 
             DrawToolbarRight();
@@ -52,12 +53,13 @@ namespace NBC.ActionEditor
         }
 
 
-        private void DrawCurrentFrame()
+        protected virtual void DrawCurrentFrame()
         {
             if (App.AssetData == null)
             {
                 return;
             }
+
             var currentTime = AssetPlayer.Inst.CurrentFrame;
             var maxTime = AssetPlayer.Inst.LengthInFrames;
             GUI.color = Color.white;
@@ -73,7 +75,8 @@ namespace NBC.ActionEditor
                 GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(maxTimeStr)).x + 8));
             EditorGUILayout.EndHorizontal();
         }
-        private void DrawCurrentTime()
+
+        protected virtual void DrawCurrentTime()
         {
             if (App.AssetData == null)
             {
@@ -96,6 +99,18 @@ namespace NBC.ActionEditor
             GUILayout.Label(maxTimeStr, GUI.skin.textField,
                 GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(maxTimeStr)).x + 8));
             EditorGUILayout.EndHorizontal();
+        }
+
+        protected virtual void DrawSelectSceneGameObject()
+        {
+            if (App.AssetData == null)
+            {
+                return;
+            }
+
+            GUILayout.Label(Lan.SelectSceneGameObject);
+            AssetPlayer.Inst.SelectSceneGameObject =
+                (GameObject)EditorGUILayout.ObjectField(AssetPlayer.Inst.SelectSceneGameObject, typeof(GameObject), true);
         }
 
 

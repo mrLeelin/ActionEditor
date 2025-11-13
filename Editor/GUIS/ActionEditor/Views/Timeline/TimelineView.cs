@@ -35,7 +35,11 @@ namespace NBC.ActionEditor
             GUILayout.BeginArea(headRect, EditorStyles.helpBox);
             _headerView.OnGUI(new Rect(0, 0, headRect.width, headRect.height));
             GUILayout.EndArea();
-        
+
+            if (!AssetPlayer.Inst.ExitSelectGameObjectInPreview())
+            {
+                return;
+            }
 
             App.Width = Styles.TimelineRightWidth;
             DoZoomAndPan();
