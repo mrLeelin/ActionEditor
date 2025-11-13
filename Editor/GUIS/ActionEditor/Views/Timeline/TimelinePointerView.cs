@@ -5,13 +5,7 @@ using UnityEngine;
 
 namespace NBC.ActionEditor
 {
-    enum PointerDragType
-    {
-        None,
-        Play,
-        StartRange,
-        EndRange
-    }
+
 
     public class TimelinePointerView : ViewBase, IPointerClickHandler,
         IPointerDragHandler, IDragBeginHandler, IDragEndHandler,
@@ -22,8 +16,7 @@ namespace NBC.ActionEditor
         private Rect _playPointerHandler;
         private Rect _pointerTextRect;
 
-        private PointerDragType _dragType = PointerDragType.None;
-
+    
         protected override void OnInit()
         {
             base.OnInit();
@@ -304,22 +297,22 @@ namespace NBC.ActionEditor
             if (_playPointerHandler.Contains(eventData.MousePosition))
             {
                 Debug.Log("拖动当前播放指针");
-                _dragType = PointerDragType.Play;
+                AssetPlayer.Inst.PointerDragType = PointerDragType.Play;
             }
             else
             {
-                _dragType = PointerDragType.None;
+                AssetPlayer.Inst.PointerDragType = PointerDragType.None;
             }
         }
 
         public void OnDragEnd(PointerEventData eventData)
         {
-            _dragType = PointerDragType.None;
+            AssetPlayer.Inst.PointerDragType = PointerDragType.None;
         }
 
         public void OnPointerDrag(PointerEventData eventData)
         {
-            if (_dragType == PointerDragType.Play)
+            if (AssetPlayer.Inst.PointerDragType == PointerDragType.Play)
             {
                 ChangeCurrentTime(eventData.MousePosition);
             }

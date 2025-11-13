@@ -11,6 +11,13 @@ namespace NBC.ActionEditor
         PlayingForwards,
         PlayingBackwards
     }
+    public enum PointerDragType
+    {
+        None,
+        Play,
+        StartRange,
+        EndRange
+    }
     
     public class AssetPlayer
     {
@@ -45,6 +52,8 @@ namespace NBC.ActionEditor
         private bool preInitialized;
 
         public Asset Asset => App.AssetData;
+        
+        public PointerDragType PointerDragType { get; set; } = PointerDragType.None;
 
         /// <summary>
         /// 当前时间

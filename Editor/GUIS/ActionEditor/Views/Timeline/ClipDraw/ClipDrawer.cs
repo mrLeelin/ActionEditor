@@ -49,7 +49,20 @@ namespace NBC.ActionEditor
 
             return false;
         }
+        public static bool ClipYContainsByRealRect(Vector2 pos)
+        {
+            foreach (var clip in _clipDraws.Keys)
+            {
+                var draw = _clipDraws[clip];
+                var posY = pos.y;
+                if (posY >= draw.ClipRealRect.y && posY <= draw.ClipRealRect.y + draw.ClipRealRect.height)
+                {
+                    return true;
+                }
+            }
 
+            return false;
+        }
         public static Clip GetClipByTrackPosition(IDirectable track, Vector2 mousePosition)
         {
             foreach (var clip in _clipDraws.Keys)

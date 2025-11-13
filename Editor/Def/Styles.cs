@@ -69,6 +69,7 @@ namespace NBC.ActionEditor
         public const int PlayControlHeight = 40;
         public const int Space = 2;
         public const int LineHeight = 26;
+        public const int SingleClipRealWidth = 5;
         public const int ClipBottomRectHeight = 4;
         public const int ClipScaleRectWidth = 5;
 

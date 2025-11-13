@@ -151,10 +151,15 @@ namespace NBC.ActionEditor
         {
             var asset = App.AssetData;
             if (asset == null) return;
+            if (AssetPlayer.Inst.PointerDragType == PointerDragType.Play) return;
+
             Clip stretchClip = null;
             var dragType = ItemDragType.Pos;
+            var pos = new Vector2(eventData.MousePosition.x - Styles.TimelineLeftTotalWidth,
+                eventData.MousePosition.y);
             if (App.SelectCount == 1)
             {
+                if (!ClipDrawer.ClipYContainsByRealRect(pos)) return;
                 if (App.FistSelect is Clip clip && clip.CanScale())
                 {
                     var x = eventData.MousePosition.x - Styles.TimelineLeftTotalWidth;
@@ -181,8 +186,6 @@ namespace NBC.ActionEditor
             }
             else
             {
-                var pos = new Vector2(eventData.MousePosition.x - Styles.TimelineLeftTotalWidth,
-                    eventData.MousePosition.y);
                 if (!ClipDrawer.ClipContainsByRealRect(pos)) return;
             }
 
