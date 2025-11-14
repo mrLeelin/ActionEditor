@@ -1,4 +1,6 @@
-﻿namespace NBC.ActionEditor
+﻿using UnityEngine;
+
+namespace NBC.ActionEditor
 {
     public abstract class PreviewBase<T> : PreviewBase where T : IDirectable
     {
@@ -32,5 +34,14 @@
 
 
         public abstract void Update(float time, float previousTime);
+
+        /// <summary>
+        /// 获取编辑器选中的游戏对象
+        /// </summary>
+        /// <returns></returns>
+        protected virtual GameObject GetSelectGameObject()
+        {
+            return AssetPlayer.Inst.SelectSceneGameObject;
+        }
     }
 }

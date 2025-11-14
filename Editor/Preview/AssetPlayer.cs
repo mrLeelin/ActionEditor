@@ -11,6 +11,7 @@ namespace NBC.ActionEditor
         PlayingForwards,
         PlayingBackwards
     }
+
     public enum PointerDragType
     {
         None,
@@ -18,7 +19,7 @@ namespace NBC.ActionEditor
         StartRange,
         EndRange
     }
-    
+
     public class AssetPlayer
     {
         private static AssetPlayer _inst;
@@ -43,6 +44,8 @@ namespace NBC.ActionEditor
         /// </summary>
         private List<IDirectableTimePointer> unsortedStartTimePointers;
 
+        private Dictionary<Type, Type> previewTypeDic = new Dictionary<Type, Type>();
+
         private float playTimeMin;
         private float playTimeMax;
         private float currentTime;
@@ -52,10 +55,29 @@ namespace NBC.ActionEditor
         private bool preInitialized;
 
         public Asset Asset => App.AssetData;
-        
+
         public PointerDragType PointerDragType { get; set; } = PointerDragType.None;
-        
+
+        /// <summary>
+        /// 选中的预制体
+        /// </summary>
         public GameObject SelectSceneGameObject { get; set; }
+
+
+        public AssetPlayer()
+        {
+            App.OnOpenAsset += OnOpenAsset;
+        }
+
+        ~AssetPlayer()
+        {
+            App.OnOpenAsset -= OnOpenAsset;
+        }
+
+        private void OnOpenAsset(Asset asset)
+        {
+            InitializePreviewPointers();
+        }
 
         /// <summary>
         /// 当前时间
@@ -70,7 +92,7 @@ namespace NBC.ActionEditor
 
 
         public int LengthInFrames => Mathf.FloorToInt(Length * Prefs.FrameRate);
-        
+
         public float Length
         {
             get
@@ -86,12 +108,17 @@ namespace NBC.ActionEditor
 
         public bool ExitSelectGameObjectInPreview()
         {
-            return  SelectSceneGameObject != null;
+            return SelectSceneGameObject != null;
         }
 
         public void Sample()
         {
             Sample(currentTime);
+        }
+
+        public Type FindPreviewType(Type type)
+        {
+            return previewTypeDic.ContainsKey(type) ? previewTypeDic[type] : null;
         }
 
         public void Sample(float time)
@@ -101,7 +128,7 @@ namespace NBC.ActionEditor
             {
                 return;
             }
-            
+
             if (!preInitialized && currentTime > 0 && previousTime == 0)
             {
                 InitializePreviewPointers();
@@ -173,7 +200,7 @@ namespace NBC.ActionEditor
             timePointers = new List<IDirectableTimePointer>();
             unsortedStartTimePointers = new List<IDirectableTimePointer>();
 
-            Dictionary<Type, Type> typeDic = new Dictionary<Type, Type>();
+            previewTypeDic.Clear();
             var childs = EditorTools.GetTypeMetaDerivedFrom(typeof(PreviewBase));
             foreach (var t in childs)
             {
@@ -184,17 +211,17 @@ namespace NBC.ActionEditor
                     {
                         var bindT = c.PreviewType;
                         var iT = t.type;
-                        if (!typeDic.ContainsKey(bindT))
+                        if (!previewTypeDic.ContainsKey(bindT))
                         {
-                            if (!iT.IsAbstract) typeDic[bindT] = iT;
+                            if (!iT.IsAbstract) previewTypeDic[bindT] = iT;
                         }
                         else
                         {
-                            var old = typeDic[bindT];
+                            var old = previewTypeDic[bindT];
                             //如果不是抽象类，且是子类就更新
                             if (!iT.IsAbstract && iT.IsSubclassOf(old))
                             {
-                                typeDic[bindT] = iT;
+                                previewTypeDic[bindT] = iT;
                             }
                         }
                     }
@@ -208,30 +235,30 @@ namespace NBC.ActionEditor
                 {
                     if (!track.IsActive) continue;
                     var tType = track.GetType();
-                    if (typeDic.TryGetValue(tType, out var t1))
+                    if (previewTypeDic.TryGetValue(tType, out var t1))
                     {
                         if (Activator.CreateInstance(t1) is PreviewBase preview)
                         {
                             preview.SetTarget(track);
                             var p3 = new StartTimePointer(preview);
                             timePointers.Add(p3);
-                
+
                             unsortedStartTimePointers.Add(p3);
                             timePointers.Add(new EndTimePointer(preview));
                         }
                     }
-                
+
                     foreach (var clip in track.Clips)
                     {
                         var cType = clip.GetType();
-                        if (typeDic.TryGetValue(cType, out var t))
+                        if (previewTypeDic.TryGetValue(cType, out var t))
                         {
                             if (Activator.CreateInstance(t) is PreviewBase preview)
                             {
                                 preview.SetTarget(clip);
                                 var p3 = new StartTimePointer(preview);
                                 timePointers.Add(p3);
-                
+
                                 unsortedStartTimePointers.Add(p3);
                                 timePointers.Add(new EndTimePointer(preview));
                             }

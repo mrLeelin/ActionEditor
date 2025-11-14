@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace NBC.ActionEditor
@@ -76,6 +77,11 @@ namespace NBC.ActionEditor
             var title = string.Format(Lan.InsBaseInfo, Prefs.GetAssetTypeName(assetData.GetType()));
             GUILayout.Label(
                 $"<b><size=18>{(_optionsAssetFold ? "▼" : "▶")} {title}</size></b>");
+            var size = GUI.skin.label.CalcSize(new GUIContent(Lan.OpenScriptEditor));
+            if (GUILayout.Button(Lan.OpenScriptEditor, GUILayout.Width(size.x), GUILayout.Height(24)))
+            {
+                ScriptLocator.TryOpenScriptPath(assetData.GetType(), true);
+            }
             GUILayout.EndHorizontal();
 
             var lastRect = GUILayoutUtility.GetLastRect();
@@ -171,6 +177,17 @@ namespace NBC.ActionEditor
                 EditorGUILayout.HelpBox(description, MessageType.None);
             }
 
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Label(type.FullName);
+            GUILayout.FlexibleSpace();
+            var size = GUI.skin.label.CalcSize(new GUIContent(Lan.OpenScriptEditor));
+            if (GUILayout.Button(Lan.OpenScriptEditor, GUILayout.Width(size.x), GUILayout.Height(24)))
+            {
+                ScriptLocator.TryOpenScriptPath(type, true);
+            }
+
+            GUILayout.EndHorizontal();
             GUILayout.Space(2);
         }
     }

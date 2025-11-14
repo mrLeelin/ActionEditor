@@ -24,6 +24,7 @@ namespace NBC.ActionEditor
             Lan.Load();
             Styles.Load();
             Prefs.InitializeAssetTypes();
+          
             App.OnInitialize?.Invoke();
             //停止播放
             if (App.AssetData != null)

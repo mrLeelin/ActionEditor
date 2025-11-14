@@ -159,6 +159,7 @@ namespace NBC.ActionEditor
         public static string TrackReplica = "复制轨道";
         public static string TrackDelete = "删除轨道";
         public static string TrackDeleteTips = "确定删除改轨道吗?";
+    
 
         //**********  Clip Menu *********
         public static string ClipCopy = "拷贝";
@@ -175,5 +176,7 @@ namespace NBC.ActionEditor
         public static string OverflowInvalid = "剪辑超出有效范围";
         public static string EndTimeOverflowInvalid = "剪辑结束时间超出有效范围";
         public static string StartTimeOverflowInvalid = "剪辑开始时间超出可播放范围";
+        public static string OpenScriptEditor = "打开脚本";
+        public static string OpenPreviewScriptEditor = "打开Preview脚本";
     }
 }

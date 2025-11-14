@@ -193,8 +193,11 @@ namespace NBC.ActionEditor
 
         public void OnPointerDown(PointerEventData ev)
         {
-            _pointerDown = true;
-            _pointerDownPos = ev.MousePosition;
+            if (ev.IsLeft())
+            {
+                _pointerDown = true;
+                _pointerDownPos = ev.MousePosition;
+            }
             App.TryClearSelect(ev.MousePosition);
         }
 

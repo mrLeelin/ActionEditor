@@ -345,6 +345,11 @@ namespace NBC.ActionEditor
             {
                 menu.AddItem(new GUIContent(Lan.TrackDelete), false, DeleteContextMenu);
             }
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent(Lan.OpenScriptEditor), false, () =>
+            {
+                ScriptLocator.TryOpenScriptPath(track.GetType(),true);
+            });
 
             menu.ShowAsContext();
         }
@@ -644,7 +649,21 @@ namespace NBC.ActionEditor
                 if (clip.Parent is Track track) track.DeleteAction(clip);
                 App.Refresh();
             });
+            
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent(Lan.OpenScriptEditor), false, () =>
+            {
+                ScriptLocator.TryOpenScriptPath(clip.GetType(),true);
+            });
 
+            var previewType = AssetPlayer.Inst.FindPreviewType(clip.GetType());
+            if (previewType != null)
+            {
+                menu.AddItem(new GUIContent(Lan.OpenPreviewScriptEditor), false, () =>
+                {
+                    ScriptLocator.TryOpenScriptPath(previewType,true);
+                });
+            }
             menu.ShowAsContext();
         }
 
