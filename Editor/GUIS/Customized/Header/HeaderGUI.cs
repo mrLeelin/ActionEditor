@@ -107,10 +107,9 @@ namespace NBC.ActionEditor
             {
                 return;
             }
-
-            GUILayout.Label(Lan.SelectSceneGameObject);
-            AssetPlayer.Inst.SelectSceneGameObject =
-                (GameObject)EditorGUILayout.ObjectField(AssetPlayer.Inst.SelectSceneGameObject, typeof(GameObject), true);
+            
+            AssetPlayer.Inst.SelectSceneGameObject = SafeObjectField.Draw(Lan.SelectSceneGameObject,
+                AssetPlayer.Inst.SelectSceneGameObject, true);
         }
 
 

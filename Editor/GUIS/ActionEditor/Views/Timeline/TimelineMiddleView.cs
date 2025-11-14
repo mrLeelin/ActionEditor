@@ -217,7 +217,7 @@ namespace NBC.ActionEditor
                 return;
             }
             Rect combineRect = ClipDrawer.CombineRects(App.SelectItems);
-            DrawSolidRect(combineRect, Color.green, 2);
+            DrawSolidRect(combineRect, Color.green, 1);
         }
         private void DrawSolidRect(Rect rect, Color color, float thickness = 1f)
         {
