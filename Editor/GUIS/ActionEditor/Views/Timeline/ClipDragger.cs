@@ -165,11 +165,11 @@ namespace NBC.ActionEditor
                     var x = eventData.MousePosition.x - Styles.TimelineLeftTotalWidth;
                     var time = asset.PosToTime(x, App.Width);
                     var gapTime = asset.WidthToTime(Styles.ClipScaleRectWidth, App.Width);
-                    if (time >= clip.StartTime && time <= clip.StartTime + gapTime)
+                    if (time >= clip.StartTime - gapTime && time <= clip.StartTime + gapTime)
                     {
                         dragType = ItemDragType.StretchStart;
                     }
-                    else if (time <= clip.EndTime && time >= clip.EndTime - gapTime)
+                    else if (time <= clip.EndTime + gapTime && time >= clip.EndTime - gapTime)
                     {
                         dragType = ItemDragType.StretchEnd;
                     }
@@ -337,7 +337,15 @@ namespace NBC.ActionEditor
             if (isStart)
             {
                 _limitMinTime = 0;
-                _limitMaxTime = clip.EndTime - 0.1f;
+                if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+                {
+                    _limitMaxTime = clip.EndTime - 0.1f;
+                }
+                else
+                {
+                    _limitMaxTime = clip.EndTime - (1f / Prefs.FrameRate);
+                }
+             
                 var prevClip = clip.GetPreviousSibling();
                 if (prevClip != null)
                 {
@@ -346,7 +354,14 @@ namespace NBC.ActionEditor
             }
             else
             {
-                _limitMinTime = clip.StartTime + 0.1f;
+                if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+                {
+                    _limitMinTime = clip.StartTime + 0.1f;
+                }
+                else
+                {
+                    _limitMinTime = clip.StartTime + (1f / Prefs.FrameRate);
+                }
                 _limitMaxTime = int.MaxValue;
                 var nextClip = clip.GetNextSibling();
                 if (nextClip != null)

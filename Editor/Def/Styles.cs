@@ -51,6 +51,8 @@ namespace NBC.ActionEditor
 
         public static Color ClipSelectColor = Color.white;
         
+        public static Color  DrawMultipleRectColor = Color.sandyBrown;
+        
 
         public static GUIStyle HeaderBoxStyle => _headerBoxStyle != null
             ? _headerBoxStyle
@@ -71,7 +73,7 @@ namespace NBC.ActionEditor
         public const int LineHeight = 26;
         public const int SingleClipRealWidth = 5;
         public const int ClipBottomRectHeight = 4;
-        public const int ClipScaleRectWidth = 5;
+        public const int ClipScaleRectWidth = 10;
 
         public const int BottomHeight = 16;
 
