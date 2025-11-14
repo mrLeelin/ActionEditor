@@ -13,16 +13,19 @@ namespace NBC.ActionEditor
         [SerializeField] private string name;
 
 
-        private float _previewStartTime;
-        private float _previewLength = 1f;
-        
-        
+        //====================Real Value==========================
+        private float _realStartTime;
+        private float _realLength = 1f;
+        private bool _isBeCreateFlag;
+        //======================================================
+
+
         [MenuName("片段长度")]
         [fsIgnore]
         public virtual float Length
         {
-            get => _previewLength;
-            set => _previewLength = value;
+            get => _realLength;
+            set => _realLength = value;
         }
 
         public virtual string Info
@@ -51,17 +54,17 @@ namespace NBC.ActionEditor
             get => name;
             set => name = value;
         }
-        
+
 
         [MenuName("开始时间")]
         public float StartTime
         {
-            get => _previewStartTime;
+            get => _realStartTime;
             set
             {
-                if (Math.Abs(_previewStartTime - value) > 0.0001f)
+                if (Math.Abs(_realStartTime - value) > 0.0001f)
                 {
-                    _previewStartTime = Mathf.Max(value, 0);
+                    _realStartTime = Mathf.Max(value, 0);
                     // BlendIn = Mathf.Clamp(BlendIn, 0, Length - BlendOut);
                     // BlendOut = Mathf.Clamp(BlendOut, 0, Length - BlendIn);
                 }
@@ -119,33 +122,14 @@ namespace NBC.ActionEditor
         public virtual void OnBeforeSerialize()
         {
 #if UNITY_EDITOR
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
-            {
-                startTime = Mathf.FloorToInt(_previewStartTime * Prefs.FrameRate);
-                length = Mathf.FloorToInt(_previewLength * Prefs.FrameRate);
-            }
-            else
-            {
-                startTime = _previewStartTime;
-                length = _previewLength;
-            }
-            
+            RealValueToCache();
 #endif
         }
 
         public virtual void OnAfterDeserialize()
         {
 #if UNITY_EDITOR
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
-            {
-                _previewStartTime = (startTime / Prefs.FrameRate);
-                _previewLength = (length / Prefs.FrameRate);
-            }
-            else
-            {
-                _previewStartTime = startTime;
-                _previewLength = length;
-            }
+            CacheToRealValue();
 #endif
         }
 
@@ -184,7 +168,7 @@ namespace NBC.ActionEditor
         {
             return this.GetWeight(time, blendIn, blendOut);
         }
-        
+
         #region 长度匹配
 
         public void TryMatchSubClipLength()
@@ -228,6 +212,44 @@ namespace NBC.ActionEditor
             // CreateAnimationDataCollection();
             // OnCreate();
         }
+
+        internal void SetCreateFlag() => _isBeCreateFlag = true;
+
+#if UNITY_EDITOR
+        private void RealValueToCache()
+        {
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            {
+                startTime = Mathf.FloorToInt(_realStartTime * Prefs.FrameRate);
+                length = Mathf.FloorToInt(_realLength * Prefs.FrameRate);
+            }
+            else
+            {
+                startTime = _realStartTime;
+                length = _realLength;
+            }
+        }
+
+        private void CacheToRealValue()
+        {
+            //如果是新建的Clip 在新建的时候已经给与了 time 和length的正确值所以不需要从缓存读取值
+            if (_isBeCreateFlag)
+            {
+                return;
+            }
+
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            {
+                _realStartTime = (startTime / Prefs.FrameRate);
+                _realLength = (length / Prefs.FrameRate);
+            }
+            else
+            {
+                _realStartTime = startTime;
+                _realLength = length;
+            }
+        }
+#endif
     }
 
 

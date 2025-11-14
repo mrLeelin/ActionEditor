@@ -51,7 +51,7 @@ namespace NBC.ActionEditor
 
         public static Color ClipSelectColor = Color.white;
         
-        public static Color  DrawMultipleRectColor = Color.sandyBrown;
+        public static Color  DrawMultipleRectColor = Color.green;
         
 
         public static GUIStyle HeaderBoxStyle => _headerBoxStyle != null

@@ -155,14 +155,17 @@ namespace NBC.ActionEditor
             if (newAction != null)
             {
                 // if (!newAction.CanAdd(this)) return null;
-
+                newAction.SetCreateFlag();
                 newAction.StartTime = time;
                 newAction.Name = type.Name;
                 Clips.Add(newAction);
                 newAction.PostCreate(this);
 
                 var nextAction = Clips.FirstOrDefault(a => a.StartTime > newAction.StartTime);
-                if (nextAction != null) newAction.EndTime = Mathf.Min(newAction.EndTime, nextAction.StartTime);
+                if (nextAction != null)
+                {
+                    newAction.EndTime = Mathf.Min(newAction.EndTime, nextAction.StartTime);
+                }
 
                 Root.Validate();
                 // DirectorUtility.selectedObject = newAction;
