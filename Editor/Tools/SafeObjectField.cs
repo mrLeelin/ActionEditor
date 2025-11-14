@@ -15,9 +15,13 @@ namespace NBC.ActionEditor
             {
                 Event.current.Use(); // 阻止传递到 ObjectField 内部
             }
-            // 绘制 ObjectField
-            T newObj = EditorGUILayout.ObjectField(label, current, typeof(T), allowSceneObjects,GUILayout.MinWidth(300)) as T;
-            return newObj;
+            
+            EditorGUILayout.BeginHorizontal();
+            var labelSize = GUI.skin.label.CalcSize(new GUIContent(label));
+            GUILayout.Label(label, GUILayout.Width(labelSize.x));
+            var myObj = (T)EditorGUILayout.ObjectField(current, typeof(T), allowSceneObjects);
+            EditorGUILayout.EndHorizontal();
+            return myObj;
         }
     }
 
