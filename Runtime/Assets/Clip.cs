@@ -9,18 +9,20 @@ namespace NBC.ActionEditor
     public abstract class Clip : IClip
     {
         [SerializeField] private float startTime;
-        [SerializeField] [HideInInspector] protected float length = 1f;
+        [SerializeField] [HideInInspector] private float length = 1f;
         [SerializeField] private string name;
-        
 
+
+        private float _previewStartTime;
+        private float _previewLength = 1f;
+        
+        
         [MenuName("片段长度")]
+        [fsIgnore]
         public virtual float Length
         {
-            get => length;
-            set
-            {
-                length = value;
-            }
+            get => _previewLength;
+            set => _previewLength = value;
         }
 
         public virtual string Info
@@ -54,12 +56,12 @@ namespace NBC.ActionEditor
         [MenuName("开始时间")]
         public float StartTime
         {
-            get => startTime;
+            get => _previewStartTime;
             set
             {
-                if (Math.Abs(startTime - value) > 0.0001f)
+                if (Math.Abs(_previewStartTime - value) > 0.0001f)
                 {
-                    startTime = Mathf.Max(value, 0);
+                    _previewStartTime = Mathf.Max(value, 0);
                     // BlendIn = Mathf.Clamp(BlendIn, 0, Length - BlendOut);
                     // BlendOut = Mathf.Clamp(BlendOut, 0, Length - BlendIn);
                 }
@@ -116,10 +118,35 @@ namespace NBC.ActionEditor
 
         public virtual void OnBeforeSerialize()
         {
+#if UNITY_EDITOR
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            {
+                startTime = Mathf.FloorToInt(_previewStartTime * Prefs.FrameRate);
+                length = Mathf.FloorToInt(_previewLength * Prefs.FrameRate);
+            }
+            else
+            {
+                startTime = _previewStartTime;
+                length = _previewLength;
+            }
+            
+#endif
         }
 
         public virtual void OnAfterDeserialize()
         {
+#if UNITY_EDITOR
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            {
+                _previewStartTime = (startTime / Prefs.FrameRate);
+                _previewLength = (length / Prefs.FrameRate);
+            }
+            else
+            {
+                _previewStartTime = startTime;
+                _previewLength = length;
+            }
+#endif
         }
 
         public bool Initialize()

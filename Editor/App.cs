@@ -18,7 +18,7 @@ namespace NBC.ActionEditor
         public static CallbackFunction OnInitialize;
         public static CallbackFunction OnDisable;
         public static OpenAssetFunction OnOpenAsset;
-        
+
         public static Asset AssetData { get; private set; } = null;
 
         public static TextAsset TextAsset
@@ -147,8 +147,23 @@ namespace NBC.ActionEditor
                 return _currentInspectorPreviewAsset;
             }
         }
-        
-        public static void ClearSelect()=> _selectList.Clear();
+
+        public static void TryClearSelect(Vector2 mousePosition)
+        {
+            if (App.SelectCount <= 1)
+            {
+                return;
+            }
+            var combineRect = ClipDrawer.CombineRects(App.SelectItems);
+            var pos = new Vector2(mousePosition.x - Styles.TimelineLeftTotalWidth,
+                mousePosition.y);
+            if (!combineRect.Contains(pos))
+            {
+                App.ClearSelect();
+            }
+        }
+
+        public static void ClearSelect() => _selectList.Clear();
 
         public static void Select(params IDirectable[] objs)
         {
@@ -302,8 +317,8 @@ namespace NBC.ActionEditor
             _player.Sample();
 
             if (!IsPlay) return;
-            
-            if(IsPause) return;
+
+            if (IsPause) return;
 
             if (_player.CurrentTime >= App.AssetData.Length)
             {
@@ -312,7 +327,7 @@ namespace NBC.ActionEditor
                 return;
             }
 
-            _player.CurrentTime += delta; 
+            _player.CurrentTime += delta;
             Repaint();
         }
 

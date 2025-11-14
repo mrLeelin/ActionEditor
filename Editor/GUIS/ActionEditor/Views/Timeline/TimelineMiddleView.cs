@@ -54,8 +54,9 @@ namespace NBC.ActionEditor
             ClipDrawer.Reset();
             DrawList();
             DrawMultiple();
+            DrawMultipleRect();
         }
-        
+
 
         #region List
 
@@ -194,16 +195,7 @@ namespace NBC.ActionEditor
         {
             _pointerDown = true;
             _pointerDownPos = ev.MousePosition;
-            if (App.SelectCount > 1)
-            {
-                var combineRect = ClipDrawer.CombineRects(App.SelectItems);
-                var pos = new Vector2(ev.MousePosition.x - Styles.TimelineLeftTotalWidth,
-                    ev.MousePosition.y);
-                if (!combineRect.Contains(pos))
-                {
-                    App.ClearSelect();
-                }
-            }
+            App.TryClearSelect(ev.MousePosition);
         }
 
         public void OnPointerUp(PointerEventData ev)
@@ -218,6 +210,24 @@ namespace NBC.ActionEditor
         private bool _preMultipleResult;
         private Rect _multipleRect;
 
+        private void DrawMultipleRect()
+        {
+            if (App.SelectCount <= 1)
+            {
+                return;
+            }
+            Rect combineRect = ClipDrawer.CombineRects(App.SelectItems);
+            DrawSolidRect(combineRect, Color.green, 2);
+        }
+        private void DrawSolidRect(Rect rect, Color color, float thickness = 1f)
+        {
+            rect.center += Vector2.right * (Styles.TimelineLeftWidth +( Styles.SplitterWidth * 2));
+            // 四条边用四个细矩形绘制，避免 Handles 的坐标系差异
+            EditorGUI.DrawRect(new Rect(rect.xMin, rect.yMin, rect.width, thickness), color);                 // Top
+            EditorGUI.DrawRect(new Rect(rect.xMin, rect.yMax - thickness, rect.width, thickness), color);     // Bottom
+            EditorGUI.DrawRect(new Rect(rect.xMin, rect.yMin, thickness, rect.height), color);                // Left
+            EditorGUI.DrawRect(new Rect(rect.xMax - thickness, rect.yMin, thickness, rect.height), color);    // Right
+        }
         private void DrawMultiple()
         {
             var mousePosition = Event.current.mousePosition;

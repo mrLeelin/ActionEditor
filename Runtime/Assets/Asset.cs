@@ -14,8 +14,10 @@ namespace NBC.ActionEditor
       
         
         [SerializeField] private float length;
+        /*
         [SerializeField] private float viewTimeMin;
         [SerializeField] private float viewTimeMax;
+        */
 
         [SerializeField] private float rangeMin;
         [SerializeField] private float rangeMax ;
@@ -198,16 +200,20 @@ namespace NBC.ActionEditor
             if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
             {
                 length = Length;
+                /*
                 viewTimeMin = ViewTimeMin;
                 viewTimeMax = ViewTimeMax;
+                */
                 rangeMin = RangeMin;
                 rangeMax = RangeMax;
             }
             else
             {
                 length = Mathf.FloorToInt(Length * Prefs.FrameRate);
+                /*
                 viewTimeMin = Mathf.FloorToInt(ViewTimeMin * Prefs.FrameRate);
                 viewTimeMax = Mathf.FloorToInt(ViewTimeMax * Prefs.FrameRate);
+                */
                 rangeMin = Mathf.FloorToInt(RangeMin * Prefs.FrameRate);
                 rangeMax = Mathf.FloorToInt(RangeMax * Prefs.FrameRate);
             }
