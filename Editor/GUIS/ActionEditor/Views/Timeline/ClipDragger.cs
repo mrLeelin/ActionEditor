@@ -186,7 +186,8 @@ namespace NBC.ActionEditor
             }
             else
             {
-                if (!ClipDrawer.ClipContainsByRealRect(pos)) return;
+                if(!ClipDrawer.ClipContainsByMergeRect(App.SelectItems,pos)) return;
+                //if (!ClipDrawer.ClipContainsByRealRect(pos)) return;
             }
 
             if (dragType == ItemDragType.Pos)

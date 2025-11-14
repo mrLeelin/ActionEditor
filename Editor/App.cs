@@ -147,6 +147,8 @@ namespace NBC.ActionEditor
                 return _currentInspectorPreviewAsset;
             }
         }
+        
+        public static void ClearSelect()=> _selectList.Clear();
 
         public static void Select(params IDirectable[] objs)
         {

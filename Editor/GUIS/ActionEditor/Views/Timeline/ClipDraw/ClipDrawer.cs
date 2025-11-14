@@ -36,6 +36,43 @@ namespace NBC.ActionEditor
             return list;
         }
 
+
+        public static bool ClipContainsByMergeRect(IDirectable[] clips, Vector2 pos)
+        {
+            var combineRect = CombineRects(clips);
+            return combineRect.Contains(pos);
+        }
+
+        public static Rect CombineRects(IDirectable[] clips)
+        {
+            bool hasRect = false;
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+
+            foreach (var directable in clips)
+            {
+                if (directable is Clip clip)
+                {
+                    var rect = _clipDraws[clip].ClipRealRect;
+
+                    if (!hasRect)
+                        hasRect = true;
+
+                    minX = Mathf.Min(minX, rect.xMin);
+                    minY = Mathf.Min(minY, rect.yMin);
+                    maxX = Mathf.Max(maxX, rect.xMax);
+                    maxY = Mathf.Max(maxY, rect.yMax);
+                }
+            }
+
+            if (!hasRect)
+                return Rect.zero;
+
+            return Rect.MinMaxRect(minX, minY, maxX, maxY);
+        }
+
         public static bool ClipContainsByRealRect(Vector2 pos)
         {
             foreach (var clip in _clipDraws.Keys)
@@ -49,6 +86,7 @@ namespace NBC.ActionEditor
 
             return false;
         }
+
         public static bool ClipYContainsByRealRect(Vector2 pos)
         {
             foreach (var clip in _clipDraws.Keys)
@@ -63,6 +101,7 @@ namespace NBC.ActionEditor
 
             return false;
         }
+
         public static Clip GetClipByTrackPosition(IDirectable track, Vector2 mousePosition)
         {
             foreach (var clip in _clipDraws.Keys)

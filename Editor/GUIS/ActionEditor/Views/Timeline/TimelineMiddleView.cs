@@ -194,6 +194,16 @@ namespace NBC.ActionEditor
         {
             _pointerDown = true;
             _pointerDownPos = ev.MousePosition;
+            if (App.SelectCount > 1)
+            {
+                var combineRect = ClipDrawer.CombineRects(App.SelectItems);
+                var pos = new Vector2(ev.MousePosition.x - Styles.TimelineLeftTotalWidth,
+                    ev.MousePosition.y);
+                if (!combineRect.Contains(pos))
+                {
+                    App.ClearSelect();
+                }
+            }
         }
 
         public void OnPointerUp(PointerEventData ev)
