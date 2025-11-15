@@ -216,6 +216,18 @@ namespace NBC.ActionEditor
         }
 
         internal void SetCreateFlag() => _isBeCreateFlag = true;
+        
+        /// <summary>
+        /// 主要用于Editor中查找资源
+        /// Runtime也不会报错会返回Null
+        /// </summary>
+        /// <param name="refPath"></param>
+        /// <param name="result"></param>
+        /// <typeparam name="TObj"></typeparam>
+        /// <returns></returns>
+        protected virtual TObj FindAssetsWithPath<TObj>(string refPath,ref TObj result) 
+            where TObj : UnityEngine.Object 
+            => ResourceUtility.FindAssetsWithPath(refPath, ref result);
 
 #if UNITY_EDITOR
         private void RealValueToCache()
