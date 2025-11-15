@@ -11,6 +11,8 @@ namespace NBC.ActionEditor
 
     public delegate void OpenAssetFunction(Asset asset);
 
+    public delegate void CloseAssetsFunction();
+
     public static class App
     {
         private static TextAsset _textAsset;
@@ -18,6 +20,7 @@ namespace NBC.ActionEditor
         public static CallbackFunction OnInitialize;
         public static CallbackFunction OnDisable;
         public static OpenAssetFunction OnOpenAsset;
+        public static CloseAssetsFunction OnCloseAssets;
 
         public static Asset AssetData { get; private set; } = null;
 
@@ -31,6 +34,7 @@ namespace NBC.ActionEditor
                 if (_textAsset == null)
                 {
                     AssetData = null;
+                    OnCloseAssets?.Invoke();
                 }
                 else
                 {

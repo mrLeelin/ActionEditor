@@ -38,6 +38,8 @@ namespace NBC.ActionEditor
         }
 
         private List<IDirectableTimePointer> timePointers;
+        private List<PreviewBase> _allPreview;
+        private GameObject _currentSelectGo;
 
         /// <summary>
         /// 预览器
@@ -61,17 +63,49 @@ namespace NBC.ActionEditor
         /// <summary>
         /// 选中的预制体
         /// </summary>
-        public GameObject SelectSceneGameObject { get; set; }
+        public GameObject SelectSceneGameObject
+        {
+            get => _currentSelectGo;
+            set
+            {
+                if (_currentSelectGo != value)
+                {
+                    foreach (var previewBase in _allPreview)
+                    {
+                        previewBase.SetSelectGameObject(value);
+                    }
+                }
+
+                _currentSelectGo = value;
+            }
+        }
 
 
         public AssetPlayer()
         {
             App.OnOpenAsset += OnOpenAsset;
+            App.OnCloseAssets += OnCloseAssets;
         }
 
         ~AssetPlayer()
         {
             App.OnOpenAsset -= OnOpenAsset;
+            App.OnCloseAssets -= OnCloseAssets;
+        }
+
+        private void OnCloseAssets()
+        {
+            timePointers = null;
+            unsortedStartTimePointers = null;
+            if (_allPreview != null)
+            {
+                foreach (var preview in _allPreview)
+                {
+                    preview.OnDestroy();
+                }
+            }
+
+            previewTypeDic.Clear();
         }
 
         private void OnOpenAsset(Asset asset)
@@ -199,8 +233,10 @@ namespace NBC.ActionEditor
         {
             timePointers = new List<IDirectableTimePointer>();
             unsortedStartTimePointers = new List<IDirectableTimePointer>();
-
+            _allPreview = new List<PreviewBase>();
             previewTypeDic.Clear();
+
+
             var childs = EditorTools.GetTypeMetaDerivedFrom(typeof(PreviewBase));
             foreach (var t in childs)
             {
@@ -240,11 +276,17 @@ namespace NBC.ActionEditor
                         if (Activator.CreateInstance(t1) is PreviewBase preview)
                         {
                             preview.SetTarget(track);
+                            preview.Initialize();
+                            if (SelectSceneGameObject != null)
+                            {
+                                preview.SetSelectGameObject(SelectSceneGameObject);
+                            }
+
                             var p3 = new StartTimePointer(preview);
                             timePointers.Add(p3);
-
                             unsortedStartTimePointers.Add(p3);
                             timePointers.Add(new EndTimePointer(preview));
+                            _allPreview.Add(preview);
                         }
                     }
 
@@ -256,11 +298,17 @@ namespace NBC.ActionEditor
                             if (Activator.CreateInstance(t) is PreviewBase preview)
                             {
                                 preview.SetTarget(clip);
+                                preview.Initialize();
+                                if (SelectSceneGameObject != null)
+                                {
+                                    preview.SetSelectGameObject(SelectSceneGameObject);
+                                }
+
                                 var p3 = new StartTimePointer(preview);
                                 timePointers.Add(p3);
-
                                 unsortedStartTimePointers.Add(p3);
                                 timePointers.Add(new EndTimePointer(preview));
+                                _allPreview.Add(preview);
                             }
                         }
                     }
