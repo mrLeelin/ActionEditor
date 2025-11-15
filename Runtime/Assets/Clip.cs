@@ -28,7 +28,8 @@ namespace NBC.ActionEditor
             set => _realLength = value;
         }
 
-        public virtual string Info
+        public virtual string Info => null;
+        /*
         {
             get
             {
@@ -38,6 +39,7 @@ namespace NBC.ActionEditor
                 return GetType().Name.SplitCamelCase();
             }
         }
+        */
 
         public virtual bool IsValid => false;
 

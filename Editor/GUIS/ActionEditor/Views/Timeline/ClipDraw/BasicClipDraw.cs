@@ -127,7 +127,16 @@ namespace NBC.ActionEditor
         protected virtual void DrawName()
         {
             GUI.color = Color.white;
-            var text = _clip.GetName();
+            string text;
+            if (string.IsNullOrEmpty(_clip.Info))
+            {
+                text = _clip.GetName();
+            }
+            else
+            {
+                text = _clip.Info;
+            }
+
             var size = GUI.skin.label.CalcSize(new GUIContent(text));
             if (ClipRect.width > size.x)
             {
