@@ -32,7 +32,7 @@ namespace NBC.ActionEditor
                 if (!triggered)
                 {
                     triggered = true;
-                    target.Enter();
+                    target.Enter(false);
                     target.Update(target.directable.ToLocalTime(currentTime), 0);
                 }
             }
@@ -62,7 +62,7 @@ namespace NBC.ActionEditor
                 {
                     triggered = false;
                     target.Update(0, target.directable.ToLocalTime(previousTime));
-                    target.Reverse();
+                    target.Exit(true);
                 }
             }
         }
@@ -89,7 +89,7 @@ namespace NBC.ActionEditor
                 {
                     triggered = true;
                     target.Update(target.directable.GetLength(), target.directable.ToLocalTime(previousTime));
-                    target.Exit();
+                    target.Exit(false);
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace NBC.ActionEditor
                 if (triggered)
                 {
                     triggered = false;
-                    target.ReverseEnter();
+                    target.Enter(true);
                     target.Update(target.directable.ToLocalTime(currentTime), target.directable.GetLength());
                 }
             }

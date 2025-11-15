@@ -11,9 +11,9 @@ namespace NBC.ActionEditor
     {
         public IDirectable directable;
 
-        
+
         protected GameObject Target { get; private set; }
-        
+
         public void SetTarget(IDirectable t)
         {
             directable = t;
@@ -37,56 +37,37 @@ namespace NBC.ActionEditor
         /// </summary>
         public virtual void Initialize()
         {
-          
-        }
-        /// <summary>
-        /// 从前面进入
-        /// </summary>
-        public virtual void Enter()
-        {
-            
         }
 
         /// <summary>
-        /// 从后面出去
+        /// 进入
+        /// isReverse 是否从右边进入
         /// </summary>
-        public virtual void Exit()
+        public virtual void Enter(bool isReverse)
         {
-           
         }
 
         /// <summary>
-        /// 从后面进入
+        /// 退出
+        /// isReverse 是否从左面推出
         /// </summary>
-        public virtual void ReverseEnter()
+        public virtual void Exit(bool isReverse)
         {
-           
         }
 
-        /// <summary>
-        /// 从左面出去
-        /// </summary>
-        public virtual void Reverse()
-        {
-            
-        }
-        
         /// <summary>
         /// Assets 被释放调用
         /// </summary>
         public virtual void OnDestroy()
         {
-            
         }
 
         protected virtual void OnSetSelectGameObject(GameObject target)
         {
-        
         }
 
         protected virtual void OnClearSelectGameObject()
         {
-           
         }
 
         public abstract void Update(float time, float previousTime);

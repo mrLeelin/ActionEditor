@@ -6,10 +6,20 @@ using UnityEngine;
 
 namespace NBC.ActionEditor
 {
+    
+    public delegate void OnAddClipCallback(Clip clip);
+    public delegate void OnDeleteClipCallback(Clip clip);
+    
     [Serializable]
     [Attachable(typeof(Group))]
     public abstract class Track : IDirectable
     {
+
+        #region Static
+        public static OnAddClipCallback OnAddClip;
+        public static OnDeleteClipCallback OnDeleteClip;
+        #endregion
+        
         [SerializeField] private List<Clip> actionClips = new();
 
         [SerializeField] [HideInInspector] private string name;
@@ -158,9 +168,8 @@ namespace NBC.ActionEditor
                 newAction.SetCreateFlag();
                 newAction.StartTime = time;
                 newAction.Name = type.Name;
-                Clips.Add(newAction);
                 newAction.PostCreate(this);
-
+                Clips.Add(newAction);
                 var nextAction = Clips.FirstOrDefault(a => a.StartTime > newAction.StartTime);
                 if (nextAction != null)
                 {
@@ -169,6 +178,7 @@ namespace NBC.ActionEditor
 
                 Root.Validate();
                 // DirectorUtility.selectedObject = newAction;
+                OnAddClip?.Invoke(newAction);
             }
 
             return newAction;
@@ -186,6 +196,7 @@ namespace NBC.ActionEditor
 
                 Clips.Add(clip);
                 Root.Validate();
+                OnAddClip?.Invoke(clip);
             }
 
             return clip;
@@ -195,6 +206,7 @@ namespace NBC.ActionEditor
         {
             Clips.Remove(action);
             Root.Validate();
+            OnDeleteClip?.Invoke(action);
         }
     }
 }

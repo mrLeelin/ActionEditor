@@ -225,9 +225,9 @@ namespace NBC.ActionEditor
         /// <param name="result"></param>
         /// <typeparam name="TObj"></typeparam>
         /// <returns></returns>
-        protected virtual TObj FindAssetsWithPath<TObj>(string refPath,ref TObj result) 
+        protected virtual TObj FindAssetsWithPath<TObj>(string refPath) 
             where TObj : UnityEngine.Object 
-            => ResourceUtility.FindAssetsWithPath(refPath, ref result);
+            => ResourceUtility.FindAssetsWithPath<TObj>(refPath);
 
 #if UNITY_EDITOR
         private void RealValueToCache()
@@ -264,6 +264,9 @@ namespace NBC.ActionEditor
             }
         }
 #endif
+        public virtual void CopyFrom(Clip copyClip)
+        {
+        }
     }
 
 

@@ -131,7 +131,8 @@ namespace NBC.ActionEditor
                         clip.BlendOut = dragBeginInfo.BlendOut;
                         if (clip.Parent != dragBeginInfo.Parent)
                         {
-                            dragBeginInfo.Parent.AddClip(clip);
+                            var newClip =dragBeginInfo.Parent.AddClip(clip);
+                            App.Refresh();
                         }
                     }
                     else

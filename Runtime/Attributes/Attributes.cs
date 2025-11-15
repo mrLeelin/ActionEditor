@@ -17,6 +17,21 @@ namespace NBC.ActionEditor
         }
     }
 
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+    public sealed class ButtonAttribute : Attribute
+    {
+        public string ButtonName { get; private set; }
+    
+        public ButtonAttribute()
+        {
+            ButtonName = string.Empty;
+        }
+    
+        public ButtonAttribute(string buttonName)
+        {
+            ButtonName = buttonName;
+        }
+    }
     /// <summary>
     /// 菜单自定义名称
     /// </summary>

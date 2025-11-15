@@ -345,11 +345,10 @@ namespace NBC.ActionEditor
             {
                 menu.AddItem(new GUIContent(Lan.TrackDelete), false, DeleteContextMenu);
             }
+
             menu.AddSeparator("");
-            menu.AddItem(new GUIContent(Lan.OpenScriptEditor), false, () =>
-            {
-                ScriptLocator.TryOpenScriptPath(track.GetType(),true);
-            });
+            menu.AddItem(new GUIContent(Lan.OpenScriptEditor), false,
+                () => { ScriptLocator.TryOpenScriptPath(track.GetType(), true); });
 
             menu.ShowAsContext();
         }
@@ -582,7 +581,11 @@ namespace NBC.ActionEditor
                     var category = string.IsNullOrEmpty(info.category) ? string.Empty : (info.category + "/");
                     var tName = info.name;
                     menu.AddItem(new GUIContent(category + tName), false,
-                        () => { track.AddClip(info.type, cursorTime); });
+                        () =>
+                        {
+                            var newClip = track.AddClip(info.type, cursorTime);
+                            App.Refresh();
+                        });
                 }
 
                 if (App.CopyAsset != null && App.CopyAsset is Clip copyClip)
@@ -594,7 +597,9 @@ namespace NBC.ActionEditor
                         menu.AddItem(new GUIContent(string.Format(Lan.ClipPaste, copyType.Name)), false,
                             () =>
                             {
-                                // track.PasteClip(DirectorUtility.CopyClip, cursorTime);
+                                var newClip = track.AddClip(copyType, cursorTime);
+                                newClip.CopyFrom(copyClip);
+                                App.Refresh();
                             });
                     }
                 }
@@ -649,21 +654,18 @@ namespace NBC.ActionEditor
                 if (clip.Parent is Track track) track.DeleteAction(clip);
                 App.Refresh();
             });
-            
+
             menu.AddSeparator("");
-            menu.AddItem(new GUIContent(Lan.OpenScriptEditor), false, () =>
-            {
-                ScriptLocator.TryOpenScriptPath(clip.GetType(),true);
-            });
+            menu.AddItem(new GUIContent(Lan.OpenScriptEditor), false,
+                () => { ScriptLocator.TryOpenScriptPath(clip.GetType(), true); });
 
             var previewType = AssetPlayer.Inst.FindPreviewType(clip.GetType());
             if (previewType != null)
             {
-                menu.AddItem(new GUIContent(Lan.OpenPreviewScriptEditor), false, () =>
-                {
-                    ScriptLocator.TryOpenScriptPath(previewType,true);
-                });
+                menu.AddItem(new GUIContent(Lan.OpenPreviewScriptEditor), false,
+                    () => { ScriptLocator.TryOpenScriptPath(previewType, true); });
             }
+
             menu.ShowAsContext();
         }
 

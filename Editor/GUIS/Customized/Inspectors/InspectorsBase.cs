@@ -14,6 +14,8 @@ namespace NBC.ActionEditor
         protected object target;
 
         private Dictionary<int, bool> _unfoldDictionary = new Dictionary<int, bool>();
+        private Dictionary<MethodInfo, object[]> methodParamCache = new Dictionary<MethodInfo, object[]>();
+
 
         public void SetTarget(object t)
         {
@@ -29,6 +31,114 @@ namespace NBC.ActionEditor
         public void DrawDefaultInspector()
         {
             DrawDefaultInspector(target);
+            DrawDefaultInspectorMethod(target);
+        }
+
+        private void DrawDefaultInspectorMethod(object obj)
+        {
+            var t = obj.GetType();
+            var methods = t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            foreach (var method in methods)
+            {
+                var attributes = method.GetCustomAttributes();
+                foreach (var attribute in attributes)
+                {
+                    if (attribute is ButtonAttribute buttonAttribute)
+                    {
+                        string buttonText = string.IsNullOrEmpty(buttonAttribute.ButtonName)
+                            ? method.Name
+                            : buttonAttribute.ButtonName;
+
+                        ParameterInfo[] parameters = method.GetParameters();
+
+                        // 初始化参数缓存
+                        if (!methodParamCache.ContainsKey(method))
+                        {
+                            object[] paramValues = new object[parameters.Length];
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                Type paramType = parameters[i].ParameterType;
+                                if (paramType.IsValueType)
+                                {
+                                    paramValues[i] = Activator.CreateInstance(paramType);
+                                }
+                            }
+
+                            methodParamCache[method] = paramValues;
+                        }
+
+                        // 如果有参数，显示参数输入框
+                        if (parameters.Length > 0)
+                        {
+                            EditorGUILayout.BeginVertical("box");
+                            EditorGUILayout.LabelField(buttonText, EditorStyles.boldLabel);
+
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                ParameterInfo param = parameters[i];
+                                object currentValue = methodParamCache[method][i];
+
+                                // 根据参数类型显示不同的输入控件
+                                if (param.ParameterType == typeof(int))
+                                {
+                                    methodParamCache[method][i] =
+                                        EditorGUILayout.IntField(param.Name, (int)currentValue);
+                                }
+                                else if (param.ParameterType == typeof(float))
+                                {
+                                    methodParamCache[method][i] =
+                                        EditorGUILayout.FloatField(param.Name, (float)currentValue);
+                                }
+                                else if (param.ParameterType == typeof(string))
+                                {
+                                    methodParamCache[method][i] =
+                                        EditorGUILayout.TextField(param.Name, (string)currentValue);
+                                }
+                                else if (param.ParameterType == typeof(bool))
+                                {
+                                    methodParamCache[method][i] =
+                                        EditorGUILayout.Toggle(param.Name, (bool)currentValue);
+                                }
+                                else if (param.ParameterType == typeof(Vector3))
+                                {
+                                    methodParamCache[method][i] =
+                                        EditorGUILayout.Vector3Field(param.Name, (Vector3)currentValue);
+                                }
+                                else if (typeof(UnityEngine.Object).IsAssignableFrom(param.ParameterType))
+                                {
+                                    methodParamCache[method][i] = EditorGUILayout.ObjectField(
+                                        param.Name,
+                                        (UnityEngine.Object)currentValue,
+                                        param.ParameterType,
+                                        true
+                                    );
+                                }
+                            }
+                        }
+
+                        if (GUILayout.Button(parameters.Length > 0 ? "执行" : buttonText))
+                        {
+                            try
+                            {
+                                object[] paramValues = parameters.Length > 0 ? methodParamCache[method] : null;
+                                method.Invoke(obj, paramValues);
+
+                                EditorUtility.SetDirty(obj as UnityEngine.Object);
+                                Debug.Log($"成功调用方法: {method.Name}");
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogError($"调用方法 {method.Name} 时发生错误: {ex.Message}\n{ex.StackTrace}");
+                            }
+                        }
+
+                        if (parameters.Length > 0)
+                        {
+                            EditorGUILayout.EndVertical();
+                        }
+                    }
+                }
+            }
         }
 
         public void DrawDefaultInspector(object obj)
@@ -363,8 +473,7 @@ namespace NBC.ActionEditor
                 }
             }
 
-            if (value != newValue)
-                field.SetValue(obj, newValue);
+            if (value != newValue) field.SetValue(obj, newValue);
         }
 
         private int FieldsSprtBy(FieldInfo f1, FieldInfo f2)

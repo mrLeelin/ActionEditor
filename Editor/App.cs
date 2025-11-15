@@ -71,7 +71,10 @@ namespace NBC.ActionEditor
             var path = AssetDatabase.GetAssetPath(TextAsset);
             var json = Json.Serialize(AssetData);
             System.IO.File.WriteAllText(path, json);
+            App.Refresh();
+            /*
             AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+            */
         }
 
         public static void OnGUIEnd()

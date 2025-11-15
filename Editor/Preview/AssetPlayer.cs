@@ -47,6 +47,7 @@ namespace NBC.ActionEditor
         private List<IDirectableTimePointer> unsortedStartTimePointers;
 
         private Dictionary<Type, Type> previewTypeDic = new Dictionary<Type, Type>();
+        private Dictionary<IDirectable, PreviewBase> _linkPreview;
 
         private float playTimeMin;
         private float playTimeMax;
@@ -85,13 +86,18 @@ namespace NBC.ActionEditor
         {
             App.OnOpenAsset += OnOpenAsset;
             App.OnCloseAssets += OnCloseAssets;
+            Track.OnAddClip += OnAddClipCallBack;
+            Track.OnDeleteClip += OnDeleteClipCallBack;
         }
 
         ~AssetPlayer()
         {
             App.OnOpenAsset -= OnOpenAsset;
             App.OnCloseAssets -= OnCloseAssets;
+            Track.OnAddClip -= OnAddClipCallBack;
+            Track.OnDeleteClip -= OnDeleteClipCallBack;
         }
+
 
         private void OnCloseAssets()
         {
@@ -106,6 +112,7 @@ namespace NBC.ActionEditor
             }
 
             previewTypeDic.Clear();
+            _linkPreview = null;
         }
 
         private void OnOpenAsset(Asset asset)
@@ -226,6 +233,46 @@ namespace NBC.ActionEditor
             }
         }
 
+        private void OnDeleteClipCallBack(Clip clip)
+        {
+            if (!_linkPreview.Remove(clip, out var previewBase))
+            {
+                return;
+            }
+
+            previewBase.OnDestroy();
+            timePointers.RemoveAll(x => x.target == previewBase);
+            unsortedStartTimePointers.RemoveAll(x => x.target == previewBase);
+            _allPreview.Remove(previewBase);
+        }
+
+        private void OnAddClipCallBack(Clip clip)
+        {
+            var cType = clip.GetType();
+            if (!previewTypeDic.TryGetValue(cType, out var t))
+            {
+                return;
+            }
+
+            if (Activator.CreateInstance(t) is PreviewBase preview)
+            {
+                preview.SetTarget(clip);
+                preview.Initialize();
+                if (SelectSceneGameObject != null)
+                {
+                    preview.SetSelectGameObject(SelectSceneGameObject);
+                }
+
+                var p3 = new StartTimePointer(preview);
+                timePointers.Add(p3);
+                unsortedStartTimePointers.Add(p3);
+                timePointers.Add(new EndTimePointer(preview));
+                _allPreview.Add(preview);
+                _linkPreview.Add(clip, preview);
+            }
+        }
+
+
         /// <summary>
         /// 初始化时间指针预览器
         /// </summary>
@@ -234,6 +281,7 @@ namespace NBC.ActionEditor
             timePointers = new List<IDirectableTimePointer>();
             unsortedStartTimePointers = new List<IDirectableTimePointer>();
             _allPreview = new List<PreviewBase>();
+            _linkPreview = new Dictionary<IDirectable, PreviewBase>();
             previewTypeDic.Clear();
 
 
@@ -287,30 +335,13 @@ namespace NBC.ActionEditor
                             unsortedStartTimePointers.Add(p3);
                             timePointers.Add(new EndTimePointer(preview));
                             _allPreview.Add(preview);
+                            _linkPreview.Add(track, preview);
                         }
                     }
 
                     foreach (var clip in track.Clips)
                     {
-                        var cType = clip.GetType();
-                        if (previewTypeDic.TryGetValue(cType, out var t))
-                        {
-                            if (Activator.CreateInstance(t) is PreviewBase preview)
-                            {
-                                preview.SetTarget(clip);
-                                preview.Initialize();
-                                if (SelectSceneGameObject != null)
-                                {
-                                    preview.SetSelectGameObject(SelectSceneGameObject);
-                                }
-
-                                var p3 = new StartTimePointer(preview);
-                                timePointers.Add(p3);
-                                unsortedStartTimePointers.Add(p3);
-                                timePointers.Add(new EndTimePointer(preview));
-                                _allPreview.Add(preview);
-                            }
-                        }
+                        OnAddClipCallBack(clip);
                     }
                 }
             }
