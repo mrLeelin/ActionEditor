@@ -108,8 +108,8 @@ namespace NBC.ActionEditor
                 return;
             }
             
-            AssetPlayer.Inst.SelectSceneGameObject = SafeObjectField.Draw(Lan.SelectSceneGameObject,
-                AssetPlayer.Inst.SelectSceneGameObject, true);
+            AssetPlayer.Inst.SelectSceneGameObject = (IActionController)SafeObjectField.Draw(Lan.SelectSceneGameObject,
+                (MonoBehaviour)AssetPlayer.Inst.SelectSceneGameObject, true);
         }
 
 

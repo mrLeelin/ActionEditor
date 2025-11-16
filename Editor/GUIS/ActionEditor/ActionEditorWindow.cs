@@ -65,6 +65,7 @@ namespace NBC.ActionEditor
             EditorApplication.update -= OnEditorUpdate;
             
             App.OnDisable?.Invoke();
+            //App.TextAsset = null;
         }
 
         void OnEditorUpdate()

@@ -131,7 +131,7 @@ namespace NBC.ActionEditor
                         clip.BlendOut = dragBeginInfo.BlendOut;
                         if (clip.Parent != dragBeginInfo.Parent)
                         {
-                            var newClip =dragBeginInfo.Parent.AddClip(clip);
+                            var newClip = dragBeginInfo.Parent.AddClip(clip);
                             App.Refresh();
                         }
                     }
@@ -160,7 +160,11 @@ namespace NBC.ActionEditor
                 eventData.MousePosition.y);
             if (App.SelectCount == 1)
             {
-                if (!ClipDrawer.ClipYContainsByRealRect(pos)) return;
+                if (App.SelectItems[0] is Clip)
+                {
+                    if (!ClipDrawer.ClipYContainsByRealRect(pos)) return;
+                }
+
                 if (App.FistSelect is Clip clip && clip.CanScale())
                 {
                     var x = eventData.MousePosition.x - Styles.TimelineLeftTotalWidth;
@@ -187,7 +191,7 @@ namespace NBC.ActionEditor
             }
             else
             {
-                if(!ClipDrawer.ClipContainsByMergeRect(App.SelectItems,pos)) return;
+                if (!ClipDrawer.ClipContainsByMergeRect(App.SelectItems, pos)) return;
                 //if (!ClipDrawer.ClipContainsByRealRect(pos)) return;
             }
 
@@ -346,7 +350,7 @@ namespace NBC.ActionEditor
                 {
                     _limitMaxTime = clip.EndTime - (1f / Prefs.FrameRate);
                 }
-             
+
                 var prevClip = clip.GetPreviousSibling();
                 if (prevClip != null)
                 {
@@ -363,6 +367,7 @@ namespace NBC.ActionEditor
                 {
                     _limitMinTime = clip.StartTime + (1f / Prefs.FrameRate);
                 }
+
                 _limitMaxTime = int.MaxValue;
                 var nextClip = clip.GetNextSibling();
                 if (nextClip != null)
@@ -567,7 +572,7 @@ namespace NBC.ActionEditor
             {
                 magnetSnapInterval = Mathf.FloorToInt(1f / Prefs.FrameRate);
             }
-           
+
             magnetSnapTimesCache = result.Distinct().ToArray();
             // Debug.LogError($"缓存磁吸结果={magnetSnapTimesCache.Length}");
         }

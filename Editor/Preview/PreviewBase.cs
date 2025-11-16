@@ -12,23 +12,23 @@ namespace NBC.ActionEditor
         public IDirectable directable;
 
 
-        protected GameObject Target { get; private set; }
+        protected IActionController Target { get; private set; }
 
         public void SetTarget(IDirectable t)
         {
             directable = t;
         }
 
-        public void SetSelectGameObject(GameObject selectGameObject)
+        public void SetSelectGameObject(IActionController selectGameObject)
         {
             Target = selectGameObject;
             if (Target != null)
             {
-                OnSetSelectGameObject(Target);
+                OnSetSelectTarget(Target);
             }
             else
             {
-                OnClearSelectGameObject();
+                OnClearSelecTarget();
             }
         }
 
@@ -62,11 +62,11 @@ namespace NBC.ActionEditor
         {
         }
 
-        protected virtual void OnSetSelectGameObject(GameObject target)
+        protected virtual void OnSetSelectTarget(IActionController target)
         {
         }
 
-        protected virtual void OnClearSelectGameObject()
+        protected virtual void OnClearSelecTarget()
         {
         }
 

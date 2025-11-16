@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace NBC.ActionEditor
 {
@@ -39,7 +40,7 @@ namespace NBC.ActionEditor
 
         private List<IDirectableTimePointer> timePointers;
         private List<PreviewBase> _allPreview;
-        private GameObject _currentSelectGo;
+        private IActionController _currentSelectGo;
 
         /// <summary>
         /// 预览器
@@ -61,10 +62,15 @@ namespace NBC.ActionEditor
 
         public PointerDragType PointerDragType { get; set; } = PointerDragType.None;
 
+        
+        /// <summary>
+        /// 预览器根节点
+        /// </summary>
+        public GameObject PreviewGroupRoot { get; private set; }
         /// <summary>
         /// 选中的预制体
         /// </summary>
-        public GameObject SelectSceneGameObject
+        public IActionController SelectSceneGameObject
         {
             get => _currentSelectGo;
             set
@@ -113,10 +119,12 @@ namespace NBC.ActionEditor
 
             previewTypeDic.Clear();
             _linkPreview = null;
+            DestroyPreviewAssetsRootInScene();
         }
 
         private void OnOpenAsset(Asset asset)
         {
+            CreatePreviewAssetsRootInScene();
             InitializePreviewPointers();
         }
 
@@ -233,6 +241,23 @@ namespace NBC.ActionEditor
             }
         }
 
+        private void CreatePreviewAssetsRootInScene()
+        {
+            if (PreviewGroupRoot != null)
+            {
+                return;
+            }
+            PreviewGroupRoot = new GameObject(Lan.PreviewGroupRootName);
+        }
+        
+        private void DestroyPreviewAssetsRootInScene()
+        {
+            if (PreviewGroupRoot != null)
+            {
+                Object.DestroyImmediate(PreviewGroupRoot);
+                PreviewGroupRoot = null;
+            }
+        }
         private void OnDeleteClipCallBack(Clip clip)
         {
             if (!_linkPreview.Remove(clip, out var previewBase))

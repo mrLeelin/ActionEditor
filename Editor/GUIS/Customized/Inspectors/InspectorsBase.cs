@@ -120,10 +120,13 @@ namespace NBC.ActionEditor
                         {
                             try
                             {
-                                object[] paramValues = parameters.Length > 0 ? methodParamCache[method] : null;
+                                var paramValues = parameters.Length > 0 ? methodParamCache[method] : null;
                                 method.Invoke(obj, paramValues);
+                                if (obj is UnityEngine.Object unityObj)
+                                {
+                                    EditorUtility.SetDirty(unityObj);
+                                }
 
-                                EditorUtility.SetDirty(obj as UnityEngine.Object);
                                 Debug.Log($"成功调用方法: {method.Name}");
                             }
                             catch (Exception ex)
@@ -472,9 +475,26 @@ namespace NBC.ActionEditor
                     }
                 }
             }
+            else if (FieldDefaultInspectorExport(fieldType, showType, value, out newValue, name))
+            {
+                //已经处理过了
+            }
+            else
+            {
+                //提示不支持
+                EditorGUILayout.LabelField(name, $"Not Support Type: {fieldType.Name}");
+            }
 
             if (value != newValue) field.SetValue(obj, newValue);
         }
+
+        protected virtual bool FieldDefaultInspectorExport(Type fieldType, Type showType, object value,
+            out object newValue, string name)
+        {
+            newValue = value;
+            return false;
+        }
+
 
         private int FieldsSprtBy(FieldInfo f1, FieldInfo f2)
         {
