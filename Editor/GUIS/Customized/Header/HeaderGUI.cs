@@ -22,7 +22,8 @@ namespace NBC.ActionEditor
             }
 
             DrawSelectSceneGameObject();
-            DrawAssetsHeader();
+            //DrawAssetsHeader();
+            DrawAssetsHeaders();
             GUILayout.FlexibleSpace();
             DrawToolbarRight();
             GUILayout.EndHorizontal();
@@ -35,6 +36,12 @@ namespace NBC.ActionEditor
             var customAssetHeader = EditorCustomFactory.GetHeader(App.AssetData);
             if (customAssetHeader == null) return;
             customAssetHeader.OnGUI();
+        }
+        protected virtual void DrawAssetsHeaders()
+        {
+            var customAssetHeader = EditorCustomFactory.GetHeaders();
+            if (customAssetHeader == null) return;
+            foreach(var header in customAssetHeader) header.OnGUI();
         }
 
         protected virtual void DrawNowAssetName()

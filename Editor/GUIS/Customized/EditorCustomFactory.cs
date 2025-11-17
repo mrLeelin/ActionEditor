@@ -11,10 +11,23 @@ namespace NBC.ActionEditor
         private static bool _initHeadersDic = false;
         private static readonly Dictionary<Type, Type> _headerDic = new Dictionary<Type, Type>();
 
+
+        public static List<HeaderBase> GetHeaders()
+        {
+            InitHeaderDic();
+            var list = new List<HeaderBase>();
+            foreach (var tValue in _headerDic.Values)
+            {
+                var header = Activator.CreateInstance(tValue) as HeaderBase;
+                list.Add(header);
+            }
+
+            return list;
+        }
+
         public static HeaderBase GetHeader(Asset asset)
         {
             InitHeaderDic();
-
             var type = asset.GetType();
             if (_headerDic.TryGetValue(type, out var t))
             {
