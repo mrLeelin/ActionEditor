@@ -267,4 +267,12 @@ namespace NBC.ActionEditor
             PreviewType = type;
         }
     }
+    
+    /// <summary>
+    /// 自定义片段预览
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class DrawableAttribute : Attribute
+    {
+    }
 }

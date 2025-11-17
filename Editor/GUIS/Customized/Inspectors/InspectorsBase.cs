@@ -475,9 +475,22 @@ namespace NBC.ActionEditor
                     }
                 }
             }
-            else if (FieldDefaultInspectorExport(fieldType, showType, value, out newValue, name))
+            else if (showType.GetCustomAttribute<DrawableAttribute>() != null)
             {
                 //已经处理过了
+                EditorGUILayout.BeginVertical("box");
+                if (value == null)
+                {
+                    value = Activator.CreateInstance(fieldType);
+                }
+                //递归渲染里面的
+                DrawDefaultInspector(value);
+                newValue = value;
+                EditorGUILayout.EndVertical();
+            }
+            else if(DrawCustomFieldInspector(fieldType, showType, value, out newValue, name))
+            {
+                
             }
             else
             {
@@ -485,16 +498,25 @@ namespace NBC.ActionEditor
                 EditorGUILayout.LabelField(name, $"Not Support Type: {fieldType.Name}");
             }
 
+
             if (value != newValue) field.SetValue(obj, newValue);
         }
 
-        protected virtual bool FieldDefaultInspectorExport(Type fieldType, Type showType, object value,
-            out object newValue, string name)
+        /// <summary>
+        /// 子类继承的时候可以单独绘制
+        /// </summary>
+        /// <param name="fieldType"></param>
+        /// <param name="showType"></param>
+        /// <param name="value"></param>
+        /// <param name="newValue"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        protected virtual bool DrawCustomFieldInspector(Type fieldType, Type showType, object value, out object newValue,
+            string name)
         {
             newValue = value;
             return false;
         }
-
 
         private int FieldsSprtBy(FieldInfo f1, FieldInfo f2)
         {
