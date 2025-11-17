@@ -12,7 +12,6 @@ namespace NBC.ActionEditor
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
             DrawNowAssetName();
-            DrawAssetsHeader();
             if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
             {
                 DrawCurrentTime();
@@ -23,10 +22,9 @@ namespace NBC.ActionEditor
             }
 
             DrawSelectSceneGameObject();
+            DrawAssetsHeader();
             GUILayout.FlexibleSpace();
-
             DrawToolbarRight();
-
             GUILayout.EndHorizontal();
         }
 
