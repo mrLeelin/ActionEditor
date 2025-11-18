@@ -11,10 +11,15 @@ namespace NBC.ActionEditor
     {
         public IDirectable directable;
         private bool _isInPreview;
-
+        /// <summary>
+        /// 用于预览的GameObject
+        /// 地下可以挂载实例化的GameObject
+        /// </summary>
+        private Transform _groupBaseTransform;
 
         protected IActionController Target { get; private set; }
         
+        protected Transform GroupBaseTransform => _groupBaseTransform;
         /// <summary>
         /// 是否在预览中
         /// </summary>
@@ -24,6 +29,8 @@ namespace NBC.ActionEditor
         {
             directable = t;
         }
+
+        public void SetGroupBaseTransform(Transform t) => _groupBaseTransform = t;
 
         public void SetSelectGameObject(IActionController selectGameObject)
         {

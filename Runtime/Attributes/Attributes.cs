@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace NBC.ActionEditor
@@ -87,6 +87,22 @@ namespace NBC.ActionEditor
         {
             argsName = name;
             argsValue = values;
+        }
+    }
+
+    /// <summary>
+    /// 关联某个 bool 字段的值
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class OptionRelateBoolAttribute : Attribute
+    {
+        public string boolFieldName;
+        public bool boolValue;
+
+        public OptionRelateBoolAttribute(string fieldName, bool value = true)
+        {
+            boolFieldName = fieldName;
+            boolValue = value;
         }
     }
 

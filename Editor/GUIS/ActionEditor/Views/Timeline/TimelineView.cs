@@ -36,11 +36,6 @@ namespace NBC.ActionEditor
             _headerView.OnGUI(new Rect(0, 0, headRect.width, headRect.height));
             GUILayout.EndArea();
 
-            if (!AssetPlayer.Inst.ExitSelectGameObjectInPreview())
-            {
-                return;
-            }
-
             App.Width = Styles.TimelineRightWidth;
             DoZoomAndPan();
             ItemDragger.OnCheck();

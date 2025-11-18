@@ -62,11 +62,12 @@ namespace NBC.ActionEditor
 
         public PointerDragType PointerDragType { get; set; } = PointerDragType.None;
 
-        
+
         /// <summary>
         /// 预览器根节点
         /// </summary>
         public GameObject PreviewGroupRoot { get; private set; }
+
         /// <summary>
         /// 选中的预制体
         /// </summary>
@@ -248,9 +249,10 @@ namespace NBC.ActionEditor
             {
                 return;
             }
+
             PreviewGroupRoot = new GameObject(Lan.PreviewGroupRootName);
         }
-        
+
         private void DestroyPreviewAssetsRootInScene()
         {
             if (PreviewGroupRoot != null)
@@ -259,8 +261,8 @@ namespace NBC.ActionEditor
                 PreviewGroupRoot = null;
             }
         }
-        
-        
+
+
         private void ClearAllPreviewHandles()
         {
             if (PreviewGroupRoot == null)
@@ -268,12 +270,8 @@ namespace NBC.ActionEditor
                 return;
             }
             
-            var handles = PreviewGroupRoot.GetComponents<PreviewerOnObject>();
-            foreach (var handle in handles)
-            {
-                handle.SelfDestroy();
-            }
         }
+
         private void OnDeleteClipCallBack(Clip clip)
         {
             if (!_linkPreview.Remove(clip, out var previewBase))
@@ -298,6 +296,7 @@ namespace NBC.ActionEditor
             if (Activator.CreateInstance(t) is PreviewBase preview)
             {
                 preview.SetTarget(clip);
+                preview.SetGroupBaseTransform(PreviewGroupRoot.transform);
                 preview.Initialize();
                 if (SelectSceneGameObject != null)
                 {
@@ -310,6 +309,33 @@ namespace NBC.ActionEditor
                 timePointers.Add(new EndTimePointer(preview));
                 _allPreview.Add(preview);
                 _linkPreview.Add(clip, preview);
+            }
+        }
+
+        private void OnAddTrackCallBack(Track track)
+        {
+            var tType = track.GetType();
+            if (!previewTypeDic.TryGetValue(tType, out var t1))
+            {
+                return;
+            }
+
+            if (Activator.CreateInstance(t1) is PreviewBase preview)
+            {
+                preview.SetTarget(track);
+                preview.SetGroupBaseTransform(PreviewGroupRoot.transform);
+                preview.Initialize();
+                if (SelectSceneGameObject != null)
+                {
+                    preview.SetSelectGameObject(SelectSceneGameObject);
+                }
+
+                var p3 = new StartTimePointer(preview);
+                timePointers.Add(p3);
+                unsortedStartTimePointers.Add(p3);
+                timePointers.Add(new EndTimePointer(preview));
+                _allPreview.Add(preview);
+                _linkPreview.Add(track, preview);
             }
         }
 
@@ -359,27 +385,7 @@ namespace NBC.ActionEditor
                 foreach (var track in group.Tracks.AsEnumerable().Reverse())
                 {
                     if (!track.IsActive) continue;
-                    var tType = track.GetType();
-                    if (previewTypeDic.TryGetValue(tType, out var t1))
-                    {
-                        if (Activator.CreateInstance(t1) is PreviewBase preview)
-                        {
-                            preview.SetTarget(track);
-                            preview.Initialize();
-                            if (SelectSceneGameObject != null)
-                            {
-                                preview.SetSelectGameObject(SelectSceneGameObject);
-                            }
-
-                            var p3 = new StartTimePointer(preview);
-                            timePointers.Add(p3);
-                            unsortedStartTimePointers.Add(p3);
-                            timePointers.Add(new EndTimePointer(preview));
-                            _allPreview.Add(preview);
-                            _linkPreview.Add(track, preview);
-                        }
-                    }
-
+                    OnAddTrackCallBack(track);
                     foreach (var clip in track.Clips)
                     {
                         OnAddClipCallBack(clip);

@@ -35,8 +35,7 @@ namespace NBC.ActionEditor
             {
                 CreateAssetWindow.Show();
             }
-
-            DrawSelectActionController();
+            
             GUI.backgroundColor = Color.white;
             if (DrawCenteredButton(Lan.SelectAsset))
             {
@@ -52,14 +51,6 @@ namespace NBC.ActionEditor
 
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
-        }
-
-        private void DrawSelectActionController()
-        {
-            GUILayout.BeginHorizontal();
-            AssetPlayer.Inst.SelectSceneGameObject = (IActionController)SafeObjectField.Draw(Lan.SelectSceneGameObject,
-                (MonoBehaviour)AssetPlayer.Inst.SelectSceneGameObject, true);
-            GUILayout.EndHorizontal();
         }
         
         private bool DrawCenteredButton(string buttonText)

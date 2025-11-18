@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace NBC.ActionEditor
 {
-    public class PreviewerOnObject : MonoBehaviour
+    public class PreviewerOnObject
     {
 
         private PreviewBase _previewBase;
@@ -15,19 +15,11 @@ namespace NBC.ActionEditor
             SceneView.duringSceneGui -= OnSceneGUI;
         }
 
-        public virtual void Init()
+        public virtual void Init(IActionController target,PreviewBase previewBase)
         {
             SceneView.duringSceneGui += OnSceneGUI;
-        }
-
-        public void SetPreview(PreviewBase previewBase)
-        {
-            _previewBase = previewBase;
-        }
-
-        public void SetActionController(IActionController actionController)
-        {
-            _actionController = actionController;
+            this._actionController = target;
+            this._previewBase = previewBase;
         }
 
         /// <summary>
@@ -63,5 +55,7 @@ namespace NBC.ActionEditor
         public virtual void UpdateHiddenHandle()
         {
         }
+
+        protected PreviewBase GetPreviewBase() => _previewBase;
     }
 }

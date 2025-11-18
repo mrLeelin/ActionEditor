@@ -65,7 +65,7 @@ namespace NBC.ActionEditor
             EditorApplication.update -= OnEditorUpdate;
             
             App.OnDisable?.Invoke();
-            //App.TextAsset = null;
+            App.TextAsset = null;
         }
 
         void OnEditorUpdate()
@@ -80,7 +80,7 @@ namespace NBC.ActionEditor
 
         void OnGUI()
         {
-            if (App.AssetData == null || AssetPlayer.Inst.SelectSceneGameObject == null)
+            if (App.AssetData == null)
             {
                 // Test();
                 _welcomeView.OnGUI(this.position);
