@@ -10,9 +10,15 @@ namespace NBC.ActionEditor
     public abstract class PreviewBase
     {
         public IDirectable directable;
+        private bool _isInPreview;
 
 
         protected IActionController Target { get; private set; }
+        
+        /// <summary>
+        /// 是否在预览中
+        /// </summary>
+        public bool IsInPreview => _isInPreview;
 
         public void SetTarget(IDirectable t)
         {
@@ -28,7 +34,7 @@ namespace NBC.ActionEditor
             }
             else
             {
-                OnClearSelecTarget();
+                OnClearSelectTarget();
             }
         }
 
@@ -37,6 +43,7 @@ namespace NBC.ActionEditor
         /// </summary>
         public virtual void Initialize()
         {
+            _isInPreview = false;
         }
 
         /// <summary>
@@ -45,6 +52,7 @@ namespace NBC.ActionEditor
         /// </summary>
         public virtual void Enter(bool isReverse)
         {
+            _isInPreview = true;
         }
 
         /// <summary>
@@ -53,6 +61,7 @@ namespace NBC.ActionEditor
         /// </summary>
         public virtual void Exit(bool isReverse)
         {
+            _isInPreview = false;
         }
 
         /// <summary>
@@ -66,7 +75,7 @@ namespace NBC.ActionEditor
         {
         }
 
-        protected virtual void OnClearSelecTarget()
+        protected virtual void OnClearSelectTarget()
         {
         }
 

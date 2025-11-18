@@ -119,6 +119,7 @@ namespace NBC.ActionEditor
 
             previewTypeDic.Clear();
             _linkPreview = null;
+            ClearAllPreviewHandles();
             DestroyPreviewAssetsRootInScene();
         }
 
@@ -258,6 +259,21 @@ namespace NBC.ActionEditor
                 PreviewGroupRoot = null;
             }
         }
+        
+        
+        private void ClearAllPreviewHandles()
+        {
+            if (PreviewGroupRoot == null)
+            {
+                return;
+            }
+            
+            var handles = PreviewGroupRoot.GetComponents<PreviewerOnObject>();
+            foreach (var handle in handles)
+            {
+                handle.SelfDestroy();
+            }
+        }
         private void OnDeleteClipCallBack(Clip clip)
         {
             if (!_linkPreview.Remove(clip, out var previewBase))
@@ -301,7 +317,7 @@ namespace NBC.ActionEditor
         /// <summary>
         /// 初始化时间指针预览器
         /// </summary>
-        public void InitializePreviewPointers()
+        private void InitializePreviewPointers()
         {
             timePointers = new List<IDirectableTimePointer>();
             unsortedStartTimePointers = new List<IDirectableTimePointer>();

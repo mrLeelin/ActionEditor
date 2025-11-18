@@ -19,7 +19,7 @@ namespace NBC.ActionEditor
             EditorGUILayout.BeginHorizontal();
             var labelSize = GUI.skin.label.CalcSize(new GUIContent(label));
             GUILayout.Label(label, GUILayout.Width(labelSize.x));
-            var myObj = (T)EditorGUILayout.ObjectField(current, typeof(T), allowSceneObjects);
+            var myObj = (T)EditorGUILayout.ObjectField(current, typeof(T), allowSceneObjects,GUILayout.MaxWidth(200));
             EditorGUILayout.EndHorizontal();
             return myObj;
         }

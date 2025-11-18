@@ -80,7 +80,7 @@ namespace NBC.ActionEditor
 
         void OnGUI()
         {
-            if (App.AssetData == null)
+            if (App.AssetData == null || AssetPlayer.Inst.SelectSceneGameObject == null)
             {
                 // Test();
                 _welcomeView.OnGUI(this.position);
