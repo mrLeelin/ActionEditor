@@ -49,6 +49,7 @@ namespace NBC.ActionEditor
 
         private Dictionary<Type, Type> previewTypeDic = new Dictionary<Type, Type>();
         private Dictionary<IDirectable, PreviewBase> _linkPreview;
+        private List<PreviewerOnObject> _previewHandles;
 
         private float playTimeMin;
         private float playTimeMax;
@@ -95,6 +96,7 @@ namespace NBC.ActionEditor
             App.OnCloseAssets += OnCloseAssets;
             Track.OnAddClip += OnAddClipCallBack;
             Track.OnDeleteClip += OnDeleteClipCallBack;
+            _previewHandles = new List<PreviewerOnObject>();
         }
 
         ~AssetPlayer()
@@ -194,7 +196,25 @@ namespace NBC.ActionEditor
             previousTime = currentTime;
         }
 
-        void InternalSamplePointers(float currentTime, float previousTime)
+        public THandle CreateHandle<THandle>(PreviewBase previewBase) where THandle : PreviewerOnObject, new()
+        {
+            var result = new THandle();
+            result.Init(SelectSceneGameObject, previewBase);
+            _previewHandles.Add(result);
+            return result;
+        }
+
+        public void DestroyHandle(PreviewerOnObject handle)
+        {
+            if (handle == null)
+            {
+                return;
+            }
+            handle.SelfDestroy();
+            _previewHandles.Remove(handle);
+        }
+
+        private void InternalSamplePointers(float currentTime, float previousTime)
         {
             if (!Application.isPlaying || currentTime > previousTime)
             {
@@ -265,11 +285,11 @@ namespace NBC.ActionEditor
 
         private void ClearAllPreviewHandles()
         {
-            if (PreviewGroupRoot == null)
+            foreach (var previewerOnObject in _previewHandles)
             {
-                return;
+                previewerOnObject.SelfDestroy();
             }
-            
+            _previewHandles.Clear();
         }
 
         private void OnDeleteClipCallBack(Clip clip)

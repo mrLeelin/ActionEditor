@@ -21,6 +21,11 @@ namespace NBC.ActionEditor
             return Mathf.Clamp(time - directable.StartTime, 0, directable.GetLength());
         }
 
+        public static float ToPercentage(this IDirectable directable, float time)
+        {
+            return directable.ToLocalTime(time) / directable.GetLength();
+        }
+        
 
         public static float ToLocalTimeUnclamped(this IDirectable directable, float time)
         {

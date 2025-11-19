@@ -57,5 +57,9 @@ namespace NBC.ActionEditor
         }
 
         protected PreviewBase GetPreviewBase() => _previewBase;
+
+        protected T GetActionController<T>()
+            where T : IActionController
+            => (T)_actionController;
     }
 }
