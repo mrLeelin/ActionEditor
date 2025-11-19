@@ -264,7 +264,7 @@ namespace NBC.ActionEditor
             }
         }
 #endif
-        public virtual void CopyFrom(Clip copyClip)
+        public virtual void CopyFrom(Clip originClip)
         {
         }
     }

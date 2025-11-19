@@ -112,14 +112,18 @@ namespace NBC.ActionEditor
             var timespan = DateTime.Now - _lastSaveTime;
             if (timespan.Seconds > Prefs.autoSaveSeconds)
             {
-                AutoSave();
+                AutoSave(false);
             }
         }
 
-        public static void AutoSave()
+        public static void AutoSave(bool force)
         {
             _lastSaveTime = DateTime.Now;
             SaveAsset();
+            if (force)
+            {
+                AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+            }
         }
 
         #endregion
@@ -158,7 +162,7 @@ namespace NBC.ActionEditor
 
         public static void TryClearSelect(Vector2 mousePosition)
         {
-            if (App.SelectCount <= 1)
+            if (App.SelectCount <= 0)
             {
                 return;
             }

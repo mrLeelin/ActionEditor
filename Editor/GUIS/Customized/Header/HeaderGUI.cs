@@ -52,7 +52,7 @@ namespace NBC.ActionEditor
             if (width < 80) width = 80;
             if (GUILayout.Button($"[{gName}]", EditorStyles.toolbarDropDown, GUILayout.Width(width)))
             {
-                App.AutoSave();
+                App.AutoSave(true);
                 ObjectSelectorWindow.ShowObjectPicker<TextAsset>(null, App.OnObjectPickerConfig, "Assets/");
             }
         }
@@ -130,7 +130,7 @@ namespace NBC.ActionEditor
             if (GUILayout.Button(new GUIContent(Styles.SaveIcon, Lan.Save), EditorStyles.toolbarButton,
                     GUILayout.Width(26)))
             {
-                App.AutoSave(); //先保存当前的
+                App.AutoSave(true); //先保存当前的
             }
 
             Prefs.MagnetSnapping = GUILayout.Toggle(Prefs.MagnetSnapping,

@@ -218,6 +218,7 @@ namespace NBC.ActionEditor
             var showType = field.FieldType;
             var value = field.GetValue(obj);
             var newValue = value;
+            bool forceSave = false;
 
             var name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(field.Name);
 
@@ -508,6 +509,7 @@ namespace NBC.ActionEditor
                 //递归渲染里面的
                 DrawDefaultInspector(value);
                 newValue = value;
+                forceSave = true;
                 EditorGUILayout.EndVertical();
             }
             else if(DrawCustomFieldInspector(fieldType, showType, value, out newValue, name))
@@ -521,7 +523,7 @@ namespace NBC.ActionEditor
             }
 
 
-            if (value != newValue) field.SetValue(obj, newValue);
+            if (value != newValue || forceSave) field.SetValue(obj, newValue);
         }
 
         /// <summary>
