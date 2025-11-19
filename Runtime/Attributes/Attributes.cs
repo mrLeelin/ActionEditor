@@ -97,12 +97,12 @@ namespace NBC.ActionEditor
     public class OptionRelateBoolAttribute : Attribute
     {
         public string boolFieldName;
-        public bool boolValue;
+        public bool[] boolValues;
 
-        public OptionRelateBoolAttribute(string fieldName, bool value = true)
+        public OptionRelateBoolAttribute(string fieldName, params bool[] values)
         {
             boolFieldName = fieldName;
-            boolValue = value;
+            boolValues = values.Length > 0 ? values : new bool[] { true };
         }
     }
 

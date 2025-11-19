@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -177,6 +177,24 @@ namespace NBC.ActionEditor
                             {
                                 need = false;
                                 break;
+                            }
+                        }
+                    }
+
+                    if (attribute is OptionRelateBoolAttribute boolOption)
+                    {
+                        var relate = Array.Find(fieldInfos, f1 => f1.Name == boolOption.boolFieldName);
+                        if (relate != null)
+                        {
+                            var value = relate.GetValue(obj);
+                            if (value is bool boolValue)
+                            {
+                                var index = Array.FindIndex(boolOption.boolValues, v1 => v1 == boolValue);
+                                if (index < 0)
+                                {
+                                    need = false;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -405,6 +423,10 @@ namespace NBC.ActionEditor
             else if (showType == typeof(Vector3))
             {
                 newValue = EditorGUILayout.Vector3Field(name, (Vector3)value);
+            }else if (showType == typeof(Quaternion))
+            {
+                Vector3 euler = EditorGUILayout.Vector3Field(name, ((Quaternion)value).eulerAngles);
+                newValue = Quaternion.Euler(euler);
             }
             else if (showType == typeof(Vector4))
             {
