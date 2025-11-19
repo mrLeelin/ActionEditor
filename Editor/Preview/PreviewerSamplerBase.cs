@@ -4,22 +4,24 @@ using UnityEngine;
 
 namespace NBC.ActionEditor
 {
-    public class PreviewerOnObject
+    public class PreviewerSamplerBase
     {
 
         private PreviewBase _previewBase;
         private IActionController _actionController;
+        private GameObject _previewGroupRoot;
         
         public virtual void SelfDestroy()
         {
             SceneView.duringSceneGui -= OnSceneGUI;
         }
 
-        public virtual void Init(IActionController target,PreviewBase previewBase)
+        public virtual void Init(IActionController target, PreviewBase previewBase, GameObject previewGroupRoot)
         {
             SceneView.duringSceneGui += OnSceneGUI;
             this._actionController = target;
             this._previewBase = previewBase;
+            _previewGroupRoot = previewGroupRoot;
         }
 
         /// <summary>
@@ -61,5 +63,7 @@ namespace NBC.ActionEditor
         protected T GetActionController<T>()
             where T : IActionController
             => (T)_actionController;
+        
+        protected Transform GetPreviewGroupRoot() => _previewGroupRoot.transform;
     }
 }

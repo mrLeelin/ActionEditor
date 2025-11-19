@@ -49,7 +49,7 @@ namespace NBC.ActionEditor
 
         private Dictionary<Type, Type> previewTypeDic = new Dictionary<Type, Type>();
         private Dictionary<IDirectable, PreviewBase> _linkPreview;
-        private List<PreviewerOnObject> _previewHandles;
+        private List<PreviewerSamplerBase> _previewHandles;
 
         private float playTimeMin;
         private float playTimeMax;
@@ -96,7 +96,7 @@ namespace NBC.ActionEditor
             App.OnCloseAssets += OnCloseAssets;
             Track.OnAddClip += OnAddClipCallBack;
             Track.OnDeleteClip += OnDeleteClipCallBack;
-            _previewHandles = new List<PreviewerOnObject>();
+            _previewHandles = new List<PreviewerSamplerBase>();
         }
 
         ~AssetPlayer()
@@ -196,15 +196,15 @@ namespace NBC.ActionEditor
             previousTime = currentTime;
         }
 
-        public THandle CreateHandle<THandle>(PreviewBase previewBase) where THandle : PreviewerOnObject, new()
+        public THandle CreateSampler<THandle>(PreviewBase previewBase) where THandle : PreviewerSamplerBase, new()
         {
             var result = new THandle();
-            result.Init(SelectSceneGameObject, previewBase);
+            result.Init(SelectSceneGameObject, previewBase,PreviewGroupRoot);
             _previewHandles.Add(result);
             return result;
         }
 
-        public void DestroyHandle(PreviewerOnObject handle)
+        public void DestroySampler(PreviewerSamplerBase handle)
         {
             if (handle == null)
             {
