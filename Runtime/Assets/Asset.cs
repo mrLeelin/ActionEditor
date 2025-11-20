@@ -10,9 +10,10 @@ namespace NBC.ActionEditor
     public abstract class Asset : IDirector
     {
         [HideInInspector] public List<Group> groups = new();
-        
+
+
+
       
-        
         [SerializeField] private float length;
         /*
         [SerializeField] private float viewTimeMin;

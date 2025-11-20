@@ -29,12 +29,15 @@ namespace NBC.ActionEditor
             get => _textAsset;
             set
             {
-                _textAsset = value;
+                if (_textAsset != null)
+                {
+                    OnCloseAssets?.Invoke();
+                }
 
+                _textAsset = value;
                 if (_textAsset == null)
                 {
                     AssetData = null;
-                    OnCloseAssets?.Invoke();
                 }
                 else
                 {
@@ -166,6 +169,7 @@ namespace NBC.ActionEditor
             {
                 return;
             }
+
             var combineRect = ClipDrawer.CombineRects(App.SelectItems);
             var pos = new Vector2(mousePosition.x - Styles.TimelineLeftTotalWidth,
                 mousePosition.y);

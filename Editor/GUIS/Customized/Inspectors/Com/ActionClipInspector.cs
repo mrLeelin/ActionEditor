@@ -24,12 +24,14 @@ namespace NBC.ActionEditor
             ShowErrors();
             ShowInOutControls();
             ShowBlendingControls();
+            ShowEnableLoop();
+        
             if (showBaseInspector)
             {
                 base.OnInspectorGUI();
             }
         }
-        
+
         void ShowErrors()
         {
             if (action.IsValid) return;
@@ -37,7 +39,7 @@ namespace NBC.ActionEditor
                 MessageType.Error);
             GUILayout.Space(5);
         }
-        
+
         void ShowInOutControls()
         {
             var previousClip = action.GetPreviousSibling();
@@ -144,7 +146,7 @@ namespace NBC.ActionEditor
 
                 _in = Mathf.Clamp(_in, previousTime, _out);
                 _out = Mathf.Clamp(_out, _in, nextClip != null ? nextTime : float.PositiveInfinity);
-                
+
                 action.StartTime = _in;
                 action.EndTime = _out;
                 App.Repaint();
@@ -175,6 +177,14 @@ namespace NBC.ActionEditor
             }
 
             GUILayout.EndVertical();
+        }
+
+        private void ShowEnableLoop()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Clip是否循环:");
+            action.EnableLoop = EditorGUILayout.Toggle(action.EnableLoop);
+            GUILayout.EndHorizontal();
         }
 
         /// <summary>

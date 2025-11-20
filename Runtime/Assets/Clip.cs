@@ -8,6 +8,7 @@ namespace NBC.ActionEditor
     [Serializable]
     public abstract class Clip : IClip
     {
+        [SerializeField] private bool enableLoop = true;
         [SerializeField] private float startTime;
         [SerializeField] [HideInInspector] private float length = 1f;
         [SerializeField] private string name;
@@ -19,6 +20,13 @@ namespace NBC.ActionEditor
         private bool _isBeCreateFlag;
         //======================================================
 
+        [MenuName("是否循环")]
+        [fsIgnore]
+        public bool EnableLoop
+        {
+            get => enableLoop;
+            set => enableLoop = value;
+        }
 
         [MenuName("片段长度")]
         [fsIgnore]
@@ -120,6 +128,12 @@ namespace NBC.ActionEditor
 
         public virtual bool CanCrossBlend { get; }
 
+        [Button("长度铺满")]
+        public void ResetLengthToAssets()
+        {
+            StartTime = 0;
+            Length = Root.Length;
+        }
 
         public virtual void OnBeforeSerialize()
         {
