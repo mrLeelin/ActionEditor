@@ -165,6 +165,23 @@ namespace NBC.ActionEditor
 
         public object AnimatedParametersTarget { get; }
 
+        public Group GetParentGroup()
+        {
+            var track = Parent;
+            if (track == null)
+            {
+                return null;
+            }
+
+            var group = track.Parent;
+            if (group == null)
+            {
+                return null;
+            }
+
+            return group as Group;
+        }
+
         public Clip GetNextClip()
         {
             return this.GetNextSibling<Clip>();
@@ -230,7 +247,7 @@ namespace NBC.ActionEditor
         }
 
         internal void SetCreateFlag() => _isBeCreateFlag = true;
-        
+
         /// <summary>
         /// 主要用于Editor中查找资源
         /// Runtime也不会报错会返回Null
@@ -239,8 +256,8 @@ namespace NBC.ActionEditor
         /// <param name="result"></param>
         /// <typeparam name="TObj"></typeparam>
         /// <returns></returns>
-        protected virtual TObj FindAssetsWithPath<TObj>(string refPath) 
-            where TObj : UnityEngine.Object 
+        protected virtual TObj FindAssetsWithPath<TObj>(string refPath)
+            where TObj : UnityEngine.Object
             => ResourceUtility.FindAssetsWithPath<TObj>(refPath);
 
 #if UNITY_EDITOR

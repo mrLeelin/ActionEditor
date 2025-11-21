@@ -170,6 +170,11 @@ namespace NBC.ActionEditor
                 return;
             }
 
+            if (App.FistSelect is not Clip)
+            {
+                return;
+            }
+            //只取消Clip的选中
             var combineRect = ClipDrawer.CombineRects(App.SelectItems);
             var pos = new Vector2(mousePosition.x - Styles.TimelineLeftTotalWidth,
                 mousePosition.y);
