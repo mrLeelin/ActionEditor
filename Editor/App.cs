@@ -220,7 +220,7 @@ namespace NBC.ActionEditor
                     _selectList.Add(obj);
                 }
 
-                Selection.activeObject = CurrentInspectorPreviewAsset;
+                //Selection.activeObject = CurrentInspectorPreviewAsset;
                 EditorUtility.SetDirty(CurrentInspectorPreviewAsset);
 
                 // DirectorUtility.selectedObject = FistSelect;

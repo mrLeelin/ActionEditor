@@ -147,6 +147,11 @@ namespace NBC.ActionEditor
 #if UNITY_EDITOR
             CacheToRealValue();
 #endif
+            if (Application.isPlaying)
+            {
+                _realStartTime = startTime;
+                _realLength = length;
+            }
         }
 
         public bool Initialize()

@@ -12,25 +12,23 @@ namespace NBC.ActionEditor
         [HideInInspector] public List<Group> groups = new();
 
 
-
-      
-        [SerializeField] private float length;
+        [SerializeField] public float length;
         /*
         [SerializeField] private float viewTimeMin;
         [SerializeField] private float viewTimeMax;
         */
 
         [SerializeField] private float rangeMin;
-        [SerializeField] private float rangeMax ;
-        
+        [SerializeField] private float rangeMax;
+
 
         private float _previewLength = 5f;
         private float _previewTimeMin;
         private float _previewTimeMax = 5f;
-        
+
         private float _previewRangeMin;
         private float _previewRangeMax = 5f;
-        
+
         public Asset()
         {
             Init();
@@ -111,7 +109,15 @@ namespace NBC.ActionEditor
 
         public void Validate()
         {
-            directables = new List<IDirectable>();
+            if (directables == null)
+            {
+                directables = new List<IDirectable>();
+            }
+            else
+            {
+                directables.Clear();
+            }
+
             foreach (IDirectable group in groups.AsEnumerable().Reverse())
             {
                 directables.Add(group);
@@ -223,6 +229,9 @@ namespace NBC.ActionEditor
 
         public void OnAfterDeserialize()
         {
+            _previewLength = length;
+            _previewRangeMin = rangeMin;
+            _previewRangeMax = rangeMax;
             // if (!string.IsNullOrEmpty(groupStr))
             // {
             //     var obj = FullSerializerExtensions.Deserialize(typeof(List<Group>), groupStr);
