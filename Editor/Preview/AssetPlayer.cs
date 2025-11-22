@@ -176,11 +176,26 @@ namespace NBC.ActionEditor
 
         public void Sample(float time)
         {
-            CurrentTime = time;
-            if ((currentTime == 0 || currentTime == Length) && previousTime == currentTime)
+            if (!App.IsPlay)
             {
                 return;
             }
+            CurrentTime = time;
+            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            {
+                if ((currentTime == 0 || currentTime == Length) && previousTime == currentTime)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (CurrentFrame < 0 || CurrentFrame > LengthInFrames)
+                {
+                    return;
+                }
+            }
+
 
             if (!preInitialized && currentTime > 0 && previousTime == 0)
             {
@@ -199,7 +214,7 @@ namespace NBC.ActionEditor
         public THandle CreateSampler<THandle>(PreviewBase previewBase) where THandle : PreviewerSamplerBase, new()
         {
             var result = new THandle();
-            result.Init(SelectSceneGameObject, previewBase,PreviewGroupRoot);
+            result.Init(SelectSceneGameObject, previewBase, PreviewGroupRoot);
             _previewHandles.Add(result);
             return result;
         }
@@ -210,6 +225,7 @@ namespace NBC.ActionEditor
             {
                 return;
             }
+
             handle.SelfDestroy();
             _previewHandles.Remove(handle);
         }
@@ -289,6 +305,7 @@ namespace NBC.ActionEditor
             {
                 previewerOnObject.SelfDestroy();
             }
+
             _previewHandles.Clear();
         }
 

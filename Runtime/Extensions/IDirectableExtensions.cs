@@ -23,7 +23,8 @@ namespace NBC.ActionEditor
 
         public static float ToPercentage(this IDirectable directable, float time)
         {
-            return directable.ToLocalTime(time) / directable.GetLength();
+            var localTime = directable.ToLocalTime(time + directable.StartTime);
+            return localTime / directable.GetLength();
         }
         
 
