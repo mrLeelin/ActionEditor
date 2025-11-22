@@ -137,7 +137,7 @@ namespace NBC.ActionEditor
         public static string PlayTips = "点击播放";
         public static string StopTips = "点击停止播放";
         public static string StepBackwardTips = "跳转上一帧";
-
+        public static string OpenInspectorTips = "打开属性面板";
         public static string FirstFrame = "跳转到开始处";
         
 

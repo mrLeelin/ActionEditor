@@ -85,8 +85,13 @@ namespace NBC.ActionEditor
                 AssetPlayer.Inst.CurrentTime = AssetPlayer.Inst.Length;
             }
 
+            if (DrawButton(Styles.RangeIcon,Lan.OpenInspectorTips))
+            {
+                InspectorPreviewWindow.OpenWindow();
+            }
+            /*
             App.IsRange = DrawToggle(App.IsRange, Styles.RangeIcon, Lan.StepBackwardTips);
-
+            */
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
         }
