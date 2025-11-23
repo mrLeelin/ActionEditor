@@ -490,7 +490,7 @@ namespace NBC.ActionEditor
                     {
                         o = AssetDatabase.LoadAssetAtPath(path, type);
                     }
-
+                    GUILayout.Label(path);
                     var newObj = EditorGUILayout.ObjectField(name, o, type, false);
                     if (newObj != o)
                     {

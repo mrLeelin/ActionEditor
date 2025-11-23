@@ -79,9 +79,12 @@ namespace NBC.ActionEditor
             {
                 if (_currentSelectGo != value)
                 {
-                    foreach (var previewBase in _allPreview)
+                    if (_allPreview != null)
                     {
-                        previewBase.SetSelectGameObject(value);
+                        foreach (var previewBase in _allPreview)
+                        {
+                            previewBase.SetSelectGameObject(value);
+                        }
                     }
                 }
 
