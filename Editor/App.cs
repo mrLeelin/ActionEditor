@@ -174,6 +174,7 @@ namespace NBC.ActionEditor
             {
                 return;
             }
+
             //只取消Clip的选中
             var combineRect = ClipDrawer.CombineRects(App.SelectItems);
             var pos = new Vector2(mousePosition.x - Styles.TimelineLeftTotalWidth,
@@ -350,6 +351,45 @@ namespace NBC.ActionEditor
 
             _player.CurrentTime += delta;
             Repaint();
+        }
+
+        #endregion
+
+        #region 删除相关
+
+        public static void DeleteDirectable()
+        {
+            if (App.SelectCount != 1)
+            {
+                return;
+            }
+
+            var firstSelect = App.FistSelect;
+            if (firstSelect is Group group)
+            {
+                if (EditorUtility.DisplayDialog(Lan.GroupDelete, Lan.GroupDeleteTips, Lan.TipsConfirm,
+                        Lan.TipsCancel))
+                {
+                    group.Root.DeleteGroup(group);
+                }
+            }
+            else if (firstSelect is Track track)
+            {
+                if (EditorUtility.DisplayDialog(Lan.TrackDelete, Lan.TrackDeleteTips, Lan.TipsConfirm,
+                        Lan.TipsCancel))
+                {
+                    if (track.Parent is Group g)
+                    {
+                        g.DeleteTrack(track);
+                    }
+                }
+            }
+            else if (firstSelect is Clip clip)
+            {
+                if (clip.Parent is Track t) t.DeleteAction(clip);
+            }
+
+            App.Refresh();
         }
 
         #endregion

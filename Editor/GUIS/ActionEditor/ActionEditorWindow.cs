@@ -69,6 +69,23 @@ namespace NBC.ActionEditor
             App.TextAsset = null;
         }
 
+        private void TryDelHandler()
+        {
+            
+            if (App.AssetData == null)
+            {
+                return;
+            }
+            //检测 del 按钮
+            var e = Event.current;
+            if (e.type == EventType.KeyDown)
+            {
+                if (e.keyCode == KeyCode.Delete)
+                {
+                    App.DeleteDirectable();
+                }
+            }
+        }
         void OnEditorUpdate()
         {
             this.UpdateViews();
@@ -93,7 +110,7 @@ namespace NBC.ActionEditor
                 Debug.Log("MouseMove===11");
                 Repaint();
             }
-            
+            this.TryDelHandler();
             _timelineView.OnGUI(this.position);
             App.OnGUIEnd();
         }

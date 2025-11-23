@@ -261,7 +261,7 @@ namespace NBC.ActionEditor
         /// <param name="result"></param>
         /// <typeparam name="TObj"></typeparam>
         /// <returns></returns>
-        protected virtual TObj FindAssetsWithPath<TObj>(string refPath)
+        public virtual TObj FindAssetsWithPath<TObj>(string refPath)
             where TObj : UnityEngine.Object
             => ResourceUtility.FindAssetsWithPath<TObj>(refPath);
 
