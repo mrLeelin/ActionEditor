@@ -8,7 +8,7 @@ namespace NBC.ActionEditor
     [Serializable]
     public abstract class Clip : IClip
     {
-        [SerializeField] private bool enableLoop = true;
+        [SerializeField] private bool runOnlyOnce = false;
         [SerializeField] private float startTime;
         [SerializeField] [HideInInspector] private float length = 1f;
         [SerializeField] private string name;
@@ -20,12 +20,12 @@ namespace NBC.ActionEditor
         private bool _isBeCreateFlag;
         //======================================================
 
-        [MenuName("是否循环")]
+        [MenuName("是否只执行一次")]
         [fsIgnore]
-        public bool EnableLoop
+        public bool RunOnlyOnce
         {
-            get => enableLoop;
-            set => enableLoop = value;
+            get => runOnlyOnce;
+            set => runOnlyOnce = value;
         }
 
         [MenuName("片段长度")]

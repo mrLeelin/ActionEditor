@@ -169,6 +169,7 @@ namespace NBC.ActionEditor
         public static string MatchPreviousLoop = "匹配上个循环";
         public static string MatchNextLoop = "匹配下个循环";
         public static string ClipPaste = "粘贴 ({0})";
+        public static string RunOnlyOnce = "只执行一次";
 
         //**********  Inspector *********
         public static string NotSelectAsset = "当前没有选中的时间轴对象。";

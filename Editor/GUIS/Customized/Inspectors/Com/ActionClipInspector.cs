@@ -22,9 +22,7 @@ namespace NBC.ActionEditor
         protected void ShowCommonInspector(bool showBaseInspector = true)
         {
             ShowErrors();
-            /*
             ShowEnableLoop();
-            */
             ShowInOutControls();
             ShowBlendingControls();
         
@@ -184,9 +182,9 @@ namespace NBC.ActionEditor
         private void ShowEnableLoop()
         {
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Clip是否循环:");
-            action.EnableLoop = EditorGUILayout.Toggle(action.EnableLoop);
-            GUILayout.EndHorizontal();
+            GUILayout.Label(Lan.RunOnlyOnce);
+            action.RunOnlyOnce = EditorGUILayout.Toggle(action.RunOnlyOnce);
+            GUILayout.EndHorizontal(); 
         }
 
         /// <summary>
