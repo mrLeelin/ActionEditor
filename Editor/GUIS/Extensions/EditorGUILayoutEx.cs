@@ -24,7 +24,8 @@ namespace XMLib
     /// </summary>
     public static class EditorGUILayoutEx
     {
-        public static List<T> DragAndDropBox<T>(string text, params GUILayoutOption[] options) where T : UnityEngine.Object
+        public static List<T> DragAndDropBox<T>(string text, params GUILayoutOption[] options)
+            where T : UnityEngine.Object
         {
             string[] paths = DragAndDropBox($"{text}", options);
             List<T> results = new List<T>();
@@ -56,6 +57,7 @@ namespace XMLib
                         evt.Use();
                         DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
                     }
+
                     break;
 
                 case EventType.DragExited:
@@ -64,6 +66,7 @@ namespace XMLib
                         evt.Use();
                         results = DragAndDrop.paths;
                     }
+
                     break;
             }
 
@@ -80,7 +83,8 @@ namespace XMLib
 
         public delegate void ItemDrawerCallback<T>(int index, ref bool selected, T obj) where T : class;
 
-        public static int DrawList<T>(IList<T> list, int selectIndex, ref Vector2 scrollPos, Action<Action<T>> adder, ItemDrawerCallback<T> itemDrawer) where T : class
+        public static int DrawList<T>(IList<T> list, int selectIndex, ref Vector2 scrollPos, Action<Action<T>> adder,
+            ItemDrawerCallback<T> itemDrawer) where T : class
         {
             ItemDrawerCallback<T> drawer = itemDrawer ?? DefaultDrawer;
 
@@ -103,6 +107,7 @@ namespace XMLib
                         {
                             drawer(i, ref selected, obj);
                         }
+
                         GUILayout.Space(2);
 
                         if (selected)
@@ -114,6 +119,7 @@ namespace XMLib
                             selectIndex = -1;
                         }
                     }
+
                     GUILayout.FlexibleSpace();
                 }
 
@@ -134,6 +140,7 @@ namespace XMLib
                             list[selectIndex - 1] = wrapObj;
                             selectIndex -= 1;
                         }
+
                         if (GUILayout.Button("下移") && selectIndex + 1 < list.Count)
                         {
                             GUI.FocusControl(null);
@@ -158,6 +165,7 @@ namespace XMLib
                         GUI.FocusControl(null);
                         isAdd = true;
                     }
+
                     if (GUILayout.Button("删除"))
                     {
                         GUI.FocusControl(null);
@@ -167,7 +175,8 @@ namespace XMLib
             }
 
             if (isAdd)
-            {//必须放在外面，否则GUILayout会报错
+            {
+                //必须放在外面，否则GUILayout会报错
                 adder((t) =>
                 {
                     if (t == null)
@@ -192,6 +201,7 @@ namespace XMLib
                     EditorUtility.DisplayDialog("提示", "请选择一项", "确定");
                 }
             }
+
             return selectIndex;
 
             int CheckSelectIndex(ref int index, IList<T> target)
@@ -201,11 +211,13 @@ namespace XMLib
 
             void DefaultDrawer(int index, ref bool selected, T obj)
             {
-                if (GUILayout.Button($"{index}", selected ? "MeTransitionSelectHead" : "MeTransitionSelect", GUILayout.ExpandHeight(true), GUILayout.Width(15)))
+                if (GUILayout.Button($"{index}", selected ? "MeTransitionSelectHead" : "MeTransitionSelect",
+                        GUILayout.ExpandHeight(true), GUILayout.Width(15)))
                 {
                     GUI.FocusControl(null);
                     selected = !selected;
                 }
+
                 if (GUILayout.Button($"{obj}", GUI.skin.label, GUILayout.Height(30f), GUILayout.ExpandWidth(true)))
                 {
                     GUI.FocusControl(null);
@@ -225,16 +237,18 @@ namespace XMLib
             int index = 0;
 
             if (obj == null
-            || type == null
-            || (type != null && 0 > (index = Array.FindIndex(types, t => t == type))))
+                || type == null
+                || (type != null && 0 > (index = Array.FindIndex(types, t => t == type))))
             {
                 if (obj != null && type != null && (index = Array.FindIndex(types, t => t.ConvertToChecker(type))) >= 0)
-                {//转换类型
+                {
+                    //转换类型
                     type = types[index];
                     obj = Convert.ChangeType(obj, type);
                 }
                 else
-                {//初始化类型
+                {
+                    //初始化类型
                     index = 0;
                     type = types[index];
                     obj = ReflectionTools.CreateInstance(type);
@@ -261,23 +275,27 @@ namespace XMLib
                         obj = type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
                     }
                 }
+
                 obj = DrawObject(new GUIContent($"{type.GetSimpleName()}"), obj, type, attrs);
             }
 
             return obj;
         }
 
-        private static IList DrawObjectsWithTypes(GUIContent title, IList objs, Type objsType, Type[] types, object[] attrs)
+        private static IList DrawObjectsWithTypes(GUIContent title, IList objs, Type objsType, Type[] types,
+            object[] attrs)
         {
             if (!objsType.IsGenericType || objsType.GenericTypeArguments.Length != 1)
             {
                 EditorGUILayout.LabelField($"不支持 {objsType} 类型");
                 return objs;
             }
+
             Type baseType = objsType.GenericTypeArguments[0];
 
             if (objs == null)
-            {//初始化变量
+            {
+                //初始化变量
                 objs = (IList)ReflectionTools.CreateInstance(objsType);
             }
 
@@ -292,6 +310,7 @@ namespace XMLib
                     cnt++;
                     GUI.FocusControl(null);
                 }
+
                 EditorGUILayout.EndHorizontal();
                 EditorGUIUtility.labelWidth = oldLabelWidth;
 
@@ -325,12 +344,14 @@ namespace XMLib
                                 objs[i - 1] = objs[i];
                                 objs[i] = swap;
                             }
+
                             if (GUILayout.Button("↓") && i < cnt - 1)
                             {
                                 object swap = objs[i + 1];
                                 objs[i + 1] = objs[i];
                                 objs[i] = swap;
                             }
+
                             if (GUILayout.Button("x"))
                             {
                                 objs.RemoveAt(i);
@@ -340,6 +361,7 @@ namespace XMLib
                         }
                     }
                 }
+
                 EditorGUI.indentLevel -= 1;
             }
 
@@ -353,10 +375,12 @@ namespace XMLib
 
         public static float CalcLabelWidth(string label)
         {
-            return GUI.skin.label.CalcSize(new GUIContent(label)).x + EditorGUI.indentLevel * GUI.skin.label.fontSize * 2;
+            return GUI.skin.label.CalcSize(new GUIContent(label)).x +
+                   EditorGUI.indentLevel * GUI.skin.label.fontSize * 2;
         }
 
-        private static object DrawObjectCustom(out bool isDraw, GUIContent title, object obj, Type type, object[] attrs = null)
+        private static object DrawObjectCustom(out bool isDraw, GUIContent title, object obj, Type type,
+            object[] attrs = null)
         {
             try
             {
@@ -366,11 +390,13 @@ namespace XMLib
                     {
                         return false;
                     }
+
                     ObjectDrawerAttribute od = t.GetCustomAttribute<ObjectDrawerAttribute>();
                     if (od == null || od.type != type)
                     {
                         return false;
                     }
+
                     return true;
                 });
 
@@ -396,7 +422,8 @@ namespace XMLib
             using (var lay = new EditorGUILayout.VerticalScope())
             {
                 if (null == obj)
-                {//初始化
+                {
+                    //初始化
                     obj = ReflectionTools.CreateInstance(type);
                 }
 
@@ -409,10 +436,12 @@ namespace XMLib
                     switch (obj)
                     {
                         case float v:
-                            {
-                                RangeAttribute attr = GetTargetAttr<RangeAttribute>();
-                                obj = null == attr ? EditorGUILayout.FloatField(title, v) : EditorGUILayout.Slider(title, v, attr.min, attr.max);
-                            }
+                        {
+                            RangeAttribute attr = GetTargetAttr<RangeAttribute>();
+                            obj = null == attr
+                                ? EditorGUILayout.FloatField(title, v)
+                                : EditorGUILayout.Slider(title, v, attr.min, attr.max);
+                        }
                             break;
 
                         case double v:
@@ -420,14 +449,62 @@ namespace XMLib
                             break;
 
                         case int v:
+                        {
+                            var optionParamAttribute = GetTargetAttr<OptionParamAttribute>();
+                            if (optionParamAttribute != null)
+                            {
+                                // LookAtType.None
+                                var t = optionParamAttribute.classType;
+                                var fields = t.GetFields();
+                                //先对fields排序
+                                Array.Sort(fields, FieldsSort);
+
+                                var optionTitles = new List<string>();
+
+                                foreach (var f in fields)
+                                {
+                                    var menuNameAttr = f.GetCustomAttribute<MenuNameAttribute>();
+                                    optionTitles.Add(menuNameAttr != null ? menuNameAttr.showName : f.Name);
+                                }
+
+                                obj = EditorGUILayout.Popup(title, v, optionTitles.ToArray());
+                            }
+                            else
                             {
                                 RangeAttribute attr = GetTargetAttr<RangeAttribute>();
-                                obj = null == attr ? EditorGUILayout.IntField(title, v) : EditorGUILayout.IntSlider(title, v, (int)attr.min, (int)attr.max);
+                                obj = null == attr
+                                    ? EditorGUILayout.IntField(title, v)
+                                    : EditorGUILayout.IntSlider(title, v, (int)attr.min, (int)attr.max);
                             }
+                        }
                             break;
 
                         case string v:
-                            obj = EditorGUILayout.TextField(title, v);
+                        {
+                            var selectObjPathAttr = GetTargetAttr<SelectObjectPathAttribute>();
+                            if (selectObjPathAttr != null)
+                            {
+                                var selectType = selectObjPathAttr.type;
+                                UnityEngine.Object o = null;
+                                if (!string.IsNullOrEmpty(v))
+                                {
+                                    o = AssetDatabase.LoadAssetAtPath(v, selectType);
+                                }
+
+                                GUILayout.Label(v);
+                                var newObj = EditorGUILayout.ObjectField(title, o, selectType, false);
+                                if (newObj != o)
+                                {
+                                    obj = AssetDatabase.GetAssetPath(newObj);
+                                }
+                            }
+                            else
+                            {
+                                obj = EditorGUILayout.TextField(title, v);
+                            }
+                          
+                        }
+                          
                             break;
 
                         case bool v:
@@ -435,26 +512,27 @@ namespace XMLib
                             break;
 
                         case Vector2 v:
+                        {
+                            v = EditorGUILayout.Vector2Field(title, v);
+                            RangeAttribute attr = GetTargetAttr<RangeAttribute>();
+                            if (attr != null)
                             {
-                                v = EditorGUILayout.Vector2Field(title, v);
-                                RangeAttribute attr = GetTargetAttr<RangeAttribute>();
-                                if (attr != null)
+                                v.x = Mathf.Clamp(v.x, attr.min, attr.max);
+                                v.y = Mathf.Clamp(v.y, attr.min, attr.max);
+                                if (v.x > v.y)
                                 {
-                                    v.x = Mathf.Clamp(v.x, attr.min, attr.max);
-                                    v.y = Mathf.Clamp(v.y, attr.min, attr.max);
-                                    if (v.x > v.y)
-                                    {
-                                        v.x = v.y;
-                                    }
-
-                                    using (var lay2 = new EditorGUILayout.HorizontalScope())
-                                    {
-                                        GUILayout.Space(EditorGUIUtility.labelWidth);
-                                        EditorGUILayout.MinMaxSlider(ref v.x, ref v.y, attr.min, attr.max);
-                                    }
+                                    v.x = v.y;
                                 }
-                                obj = v;
+
+                                using (var lay2 = new EditorGUILayout.HorizontalScope())
+                                {
+                                    GUILayout.Space(EditorGUIUtility.labelWidth);
+                                    EditorGUILayout.MinMaxSlider(ref v.x, ref v.y, attr.min, attr.max);
+                                }
                             }
+
+                            obj = v;
+                        }
                             break;
 
                         case Vector3 v:
@@ -462,30 +540,31 @@ namespace XMLib
                             break;
 
                         case Vector2Int v:
+                        {
+                            v = EditorGUILayout.Vector2IntField(title, v);
+                            RangeAttribute attr = GetTargetAttr<RangeAttribute>();
+                            if (attr != null)
                             {
-                                v = EditorGUILayout.Vector2IntField(title, v);
-                                RangeAttribute attr = GetTargetAttr<RangeAttribute>();
-                                if (attr != null)
+                                Vector2 vf = v;
+
+                                v.x = Mathf.Clamp(Mathf.RoundToInt(vf.x), (int)attr.min, (int)attr.max);
+                                v.y = Mathf.Clamp(Mathf.RoundToInt(vf.y), (int)attr.min, (int)attr.max);
+                                if (v.x > v.y)
                                 {
-                                    Vector2 vf = v;
-
-                                    v.x = Mathf.Clamp(Mathf.RoundToInt(vf.x), (int)attr.min, (int)attr.max);
-                                    v.y = Mathf.Clamp(Mathf.RoundToInt(vf.y), (int)attr.min, (int)attr.max);
-                                    if (v.x > v.y)
-                                    {
-                                        v.x = v.y;
-                                    }
-
-                                    using (var lay2 = new EditorGUILayout.HorizontalScope())
-                                    {
-                                        GUILayout.Space(EditorGUIUtility.labelWidth);
-                                        EditorGUILayout.MinMaxSlider(ref vf.x, ref vf.y, attr.min, attr.max);
-                                    }
-
-                                    v = new Vector2Int((int)vf.x, (int)vf.y);
+                                    v.x = v.y;
                                 }
-                                obj = v;
+
+                                using (var lay2 = new EditorGUILayout.HorizontalScope())
+                                {
+                                    GUILayout.Space(EditorGUIUtility.labelWidth);
+                                    EditorGUILayout.MinMaxSlider(ref vf.x, ref vf.y, attr.min, attr.max);
+                                }
+
+                                v = new Vector2Int((int)vf.x, (int)vf.y);
                             }
+
+                            obj = v;
+                        }
                             break;
 
                         case Vector3Int v:
@@ -493,139 +572,183 @@ namespace XMLib
                             break;
 
                         case Enum v:
-                            {
-                                FlagsAttribute attr = GetTargetAttr<FlagsAttribute>();
-                                obj = null == attr ? EditorGUILayout.EnumPopup(title, v) : EditorGUILayout.EnumFlagsField(title, v);
-                            }
+                        {
+                            FlagsAttribute attr = GetTargetAttr<FlagsAttribute>();
+                            obj = null == attr
+                                ? EditorGUILayout.EnumPopup(title, v)
+                                : EditorGUILayout.EnumFlagsField(title, v);
+                        }
                             break;
 
                         case LayerMask v:
-                            {
-                                int mask = InternalEditorUtility.LayerMaskToConcatenatedLayersMask(v);
-                                mask = EditorGUILayout.MaskField(title, mask, InternalEditorUtility.layers);
-                                obj = InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(mask);
-                            }
+                        {
+                            int mask = InternalEditorUtility.LayerMaskToConcatenatedLayersMask(v);
+                            mask = EditorGUILayout.MaskField(title, mask, InternalEditorUtility.layers);
+                            obj = InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(mask);
+                        }
                             break;
-
+                        case Color v:
+                        {
+                            obj = EditorGUILayout.ColorField(title, (Color)v);
+                        }
+                            break;
+                        case AnimationCurve v:
+                        {
+                            obj = EditorGUILayout.CurveField(title, v);
+                        }
+                            break;
+                        case Quaternion v:
+                        {
+                            Vector3 euler = EditorGUILayout.Vector3Field(title, ((Quaternion)v).eulerAngles);
+                            obj = Quaternion.Euler(euler);
+                        }
+                            break;
+                        case Vector4 v:
+                        {
+                            obj = EditorGUILayout.Vector4Field(title, (Vector4)v);
+                        }
+                            break;
+                        case Rect v:
+                        {
+                            obj = EditorGUILayout.RectField(title, v);
+                        }
+                            break;
+                        case RectInt v:
+                        {
+                            obj = EditorGUILayout.RectIntField(title, v);
+                        }
+                            break;
+                        case Bounds v:
+                        {
+                            obj = EditorGUILayout.BoundsField(title, v);
+                        }
+                            break;
+                        case UnityEngine.Object v:
+                        {
+                            obj = EditorGUILayout.ObjectField(title, v, type, false);
+                        }
+                            break;
                         case IList v:
+                        {
+                            if (type.IsGenericType && type.GenericTypeArguments.Length == 1)
                             {
-                                if (type.IsGenericType && type.GenericTypeArguments.Length == 1)
+                                Type subType = type.GenericTypeArguments[0];
+
+                                using (var lay2 = new EditorGUILayout.VerticalScope("FrameBox"))
                                 {
-                                    Type subType = type.GenericTypeArguments[0];
-
-                                    using (var lay2 = new EditorGUILayout.VerticalScope("FrameBox"))
+                                    if (subType.IsClass || subType.IsValueType)
                                     {
-                                        if (subType.IsClass || subType.IsValueType)
+                                        EditorGUIUtility.labelWidth = CalcLabelWidth(title);
+                                        EditorGUILayout.BeginHorizontal();
+                                        int cnt = EditorGUILayout.IntField(title, v.Count);
+                                        if (GUILayout.Button("+", GUILayout.Width(40)))
                                         {
-                                            EditorGUIUtility.labelWidth = CalcLabelWidth(title);
-                                            EditorGUILayout.BeginHorizontal();
-                                            int cnt = EditorGUILayout.IntField(title, v.Count);
-                                            if (GUILayout.Button("+", GUILayout.Width(40)))
-                                            {
-                                                cnt++;
-                                                GUI.FocusControl(null);
-                                            }
-                                            EditorGUILayout.EndHorizontal();
-                                            EditorGUIUtility.labelWidth = oldLabelWidth;
+                                            cnt++;
+                                            GUI.FocusControl(null);
+                                        }
 
-                                            int diff = cnt - v.Count;
+                                        EditorGUILayout.EndHorizontal();
+                                        EditorGUIUtility.labelWidth = oldLabelWidth;
 
-                                            while (diff < 0)
-                                            {
-                                                v.RemoveAt(v.Count - 1);
-                                                diff++;
-                                            }
+                                        int diff = cnt - v.Count;
 
-                                            while (diff > 0)
-                                            {
-                                                object subObj = ReflectionTools.CreateInstance(subType);
-                                                v.Add(subObj);
-                                                diff--;
-                                            }
+                                        while (diff < 0)
+                                        {
+                                            v.RemoveAt(v.Count - 1);
+                                            diff++;
+                                        }
 
-                                            EditorGUI.indentLevel += 1;
-                                            for (int i = 0; i < cnt; i++)
+                                        while (diff > 0)
+                                        {
+                                            object subObj = ReflectionTools.CreateInstance(subType);
+                                            v.Add(subObj);
+                                            diff--;
+                                        }
+
+                                        EditorGUI.indentLevel += 1;
+                                        for (int i = 0; i < cnt; i++)
+                                        {
+                                            using (var lay3 = new EditorGUILayout.VerticalScope("FrameBox"))
                                             {
-                                                using (var lay3 = new EditorGUILayout.VerticalScope("FrameBox"))
+                                                v[i] = DrawObject(new GUIContent($"{i}"), v[i], subType, attrs);
+
+                                                using (var lay4 = new EditorGUILayout.HorizontalScope())
                                                 {
-                                                    v[i] = DrawObject(new GUIContent($"{i}"), v[i], subType, attrs);
-
-                                                    using (var lay4 = new EditorGUILayout.HorizontalScope())
+                                                    if (GUILayout.Button("↑") && i > 0)
                                                     {
-                                                        if (GUILayout.Button("↑") && i > 0)
-                                                        {
-                                                            object swap = v[i - 1];
-                                                            v[i - 1] = v[i];
-                                                            v[i] = swap;
-                                                        }
-                                                        if (GUILayout.Button("↓") && i < cnt - 1)
-                                                        {
-                                                            object swap = v[i + 1];
-                                                            v[i + 1] = v[i];
-                                                            v[i] = swap;
-                                                        }
-                                                        if (GUILayout.Button("x"))
-                                                        {
-                                                            v.RemoveAt(i);
-                                                            i--;
-                                                            cnt--;
-                                                        }
+                                                        object swap = v[i - 1];
+                                                        v[i - 1] = v[i];
+                                                        v[i] = swap;
+                                                    }
+
+                                                    if (GUILayout.Button("↓") && i < cnt - 1)
+                                                    {
+                                                        object swap = v[i + 1];
+                                                        v[i + 1] = v[i];
+                                                        v[i] = swap;
+                                                    }
+
+                                                    if (GUILayout.Button("x"))
+                                                    {
+                                                        v.RemoveAt(i);
+                                                        i--;
+                                                        cnt--;
                                                     }
                                                 }
                                             }
-                                            EditorGUI.indentLevel -= 1;
                                         }
+
+                                        EditorGUI.indentLevel -= 1;
                                     }
                                 }
-                                else
-                                {
-                                    EditorGUILayout.LabelField($"不支持 {type} 类型");
-                                }
-
-                                obj = v;
                             }
+                            else
+                            {
+                                EditorGUILayout.LabelField($"不支持 {type} 类型");
+                            }
+
+                            obj = v;
+                        }
                             break;
 
                         default:
+                        {
+                            if (!type.IsPrimitive && (type.IsClass || type.IsValueType))
                             {
-                                if (!type.IsPrimitive && (type.IsClass || type.IsValueType))
+                                FieldInfo[] fields = type.GetFields();
+
+                                int depth = 0;
+                                if (title != GUIContent.none)
                                 {
-                                    FieldInfo[] fields = type.GetFields();
-
-                                    //=============================================================
-                                    //查找成员显示控制
-                                    Dictionary<string, bool> enableDict = EnableToggleAttribute.GetEnableDict(obj);
-                                    //=============================================================
-
-                                    int depth = 0;
-                                    if (title != GUIContent.none)
-                                    {
-                                        EditorGUILayout.LabelField($"{title.text}");
-                                        depth = 1;
-                                    }
-
-                                    EditorGUI.indentLevel += depth;
-                                    foreach (var field in fields)
-                                    {
-                                        //=============================================================
-                                        if (!EnableToggleItemAttribute.EnableChecker(field, enableDict))
-                                        {//不显示
-                                            continue;
-                                        }
-                                        //===========================================================
-
-                                        DrawField(obj, field);
-                                    }
-                                    EditorGUI.indentLevel -= depth;
+                                    EditorGUILayout.LabelField($"{title.text}");
+                                    depth = 1;
                                 }
-                                else
+
+                                EditorGUI.indentLevel += depth;
+                                foreach (var field in fields)
                                 {
-                                    EditorGUILayout.LabelField($"不支持 {type} 类型");
+                                    //=============================================================
+                                    if (!ShouldShowField(field, fields, obj))
+                                    {
+                                        //不显示
+                                        continue;
+                                    }
+                                    //===========================================================
+
+                                    DrawField(obj, field);
                                 }
+
+                                EditorGUI.indentLevel -= depth;
                             }
+                            else
+                            {
+                                EditorGUILayout.LabelField($"不支持 {type} 类型");
+                            }
+                        }
                             break;
                     }
                 }
+
                 EditorGUIUtility.labelWidth = oldLabelWidth;
 
                 return obj;
@@ -642,6 +765,7 @@ namespace XMLib
                     {
                         result = type.GetCustomAttribute<T>();
                     }
+
                     return result;
                 }
             }
@@ -653,8 +777,21 @@ namespace XMLib
 
             ObjectTypesAttribute attr = fieldInfo.GetCustomAttribute<ObjectTypesAttribute>();
             object[] attrs = fieldInfo.GetCustomAttributes(true);
+            var fieldName = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(fieldInfo.Name);
+            ;
+            var attributes = fieldInfo.GetCustomAttributes();
 
-            GUIContent title = new GUIContent(fieldInfo.Name);
+            foreach (var attribute in attributes)
+            {
+                var t = attribute.GetType();
+                if (attribute is MenuNameAttribute menuNameAttribute)
+                {
+                    fieldName = menuNameAttribute.showName;
+                }
+            }
+
+            GUIContent title = new GUIContent(fieldName);
+
             if (attr == null)
             {
                 fieldValue = DrawObject(title, fieldValue, fieldInfo.FieldType, attrs);
@@ -671,10 +808,94 @@ namespace XMLib
             fieldInfo.SetValue(target, fieldValue);
         }
 
-        public static bool MinMaxSlider(ref float minValue, ref float maxValue, float minLimit, float maxLimit, params GUILayoutOption[] options)
+        public static bool MinMaxSlider(ref float minValue, ref float maxValue, float minLimit, float maxLimit,
+            params GUILayoutOption[] options)
         {
-            Rect position = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth / 2, EditorGUIUtility.singleLineHeight, GUI.skin.horizontalSlider);
+            Rect position = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth / 2,
+                EditorGUIUtility.singleLineHeight, GUI.skin.horizontalSlider);
             return EditorGUIEx.MinMaxSlider(position, ref minValue, ref maxValue, minLimit, maxLimit);
+        }
+
+        private static int FieldsSort(FieldInfo f1, FieldInfo f2)
+        {
+            var sort1 = f1.GetCustomAttribute<OptionSortAttribute>();
+            var sort2 = f2.GetCustomAttribute<OptionSortAttribute>();
+            var i1 = 99;
+            var i2 = 99;
+            if (sort1 != null)
+            {
+                i1 = sort1.sort;
+            }
+
+            if (sort2 != null)
+            {
+                i2 = sort2.sort;
+            }
+
+            return i1 - i2;
+        }
+
+        private static bool ShouldShowField(FieldInfo field, FieldInfo[] allFields, object obj)
+        {
+            var attributes = field.GetCustomAttributes();
+
+            foreach (var attribute in attributes)
+            {
+                if (attribute is HideInInspector)
+                {
+                    return false;
+                }
+
+                if (attribute is OptionRelateParamAttribute optionRelate)
+                {
+                    if (!CheckOptionRelateParam(optionRelate, allFields, obj))
+                    {
+                        return false;
+                    }
+                }
+
+                if (attribute is OptionRelateBoolAttribute boolRelate)
+                {
+                    if (!CheckOptionRelateBool(boolRelate, allFields, obj))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool CheckOptionRelateParam(OptionRelateParamAttribute option, FieldInfo[] allFields, object obj)
+        {
+            var relatedField = Array.Find(allFields, f => f.Name == option.argsName);
+            if (relatedField == null)
+            {
+                return true;
+            }
+
+            var fieldValue = relatedField.GetValue(obj);
+            var matchIndex = Array.FindIndex(option.argsValue, v => v.Equals(fieldValue));
+            return matchIndex >= 0;
+        }
+
+        private static bool CheckOptionRelateBool(OptionRelateBoolAttribute boolOption, FieldInfo[] allFields,
+            object obj)
+        {
+            var relatedField = Array.Find(allFields, f => f.Name == boolOption.boolFieldName);
+            if (relatedField == null)
+            {
+                return true;
+            }
+
+            var fieldValue = relatedField.GetValue(obj);
+            if (fieldValue is bool boolValue)
+            {
+                var matchIndex = Array.FindIndex(boolOption.boolValues, v => v == boolValue);
+                return matchIndex >= 0;
+            }
+
+            return true;
         }
 
         #region Extensions

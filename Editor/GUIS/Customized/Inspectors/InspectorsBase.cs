@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using XMLib;
 using Object = UnityEngine.Object;
 
 namespace NBC.ActionEditor
@@ -28,9 +29,16 @@ namespace NBC.ActionEditor
             DrawDefaultInspector();
         }
 
+        private Vector2 scrollView;
+
         public void DrawDefaultInspector()
         {
-            DrawDefaultInspector(target);
+            //DrawDefaultInspector(target);
+            //使用新的Inspector显示
+            //scrollView = EditorGUILayout.BeginScrollView(scrollView);
+            EditorGUILayoutEx.DrawObject(GUIContent.none, target, target.GetType());
+           // EditorGUILayout.EndScrollView();
+
             DrawDefaultInspectorMethod(target);
         }
 
@@ -144,6 +152,7 @@ namespace NBC.ActionEditor
             }
         }
 
+        /*
         public void DrawDefaultInspector(object obj)
         {
             var objectType = obj.GetType();
@@ -161,7 +170,7 @@ namespace NBC.ActionEditor
         private List<FieldInfo> FilterVisibleFields(FieldInfo[] fieldInfos, object obj)
         {
             List<FieldInfo> visibleFields = new List<FieldInfo>();
-            
+
             foreach (var field in fieldInfos)
             {
                 if (ShouldShowField(field, fieldInfos, obj))
@@ -176,7 +185,7 @@ namespace NBC.ActionEditor
         private bool ShouldShowField(FieldInfo field, FieldInfo[] allFields, object obj)
         {
             var attributes = field.GetCustomAttributes();
-            
+
             foreach (var attribute in attributes)
             {
                 if (attribute is HideInInspector)
@@ -277,27 +286,27 @@ namespace NBC.ActionEditor
             {
                 Type elementType = fieldType.GetGenericArguments()[0];
                 IList list = (IList)value;
-                
+
                 if (list == null)
                 {
                     list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
                     field.SetValue(obj, list);
                     newValue = list;
                 }
-                
+
                 var foldout = EditorGUILayout.Foldout(GetFoldout(list), field.GetShowName());
                 SetFoldout(list, foldout);
-                
+
                 if (foldout)
                 {
                     GUILayout.Space(6);
                     GUILayout.BeginVertical(GUI.skin.box);
-                    
+
                     int indexToRemove = -1;
                     for (int i = 0; i < list.Count; i++)
                     {
                         object listItem = list[i];
-                        
+
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField($"Element {i}");
                         if (GUILayout.Button("X", GUILayout.Width(20)))
@@ -305,11 +314,11 @@ namespace NBC.ActionEditor
                             indexToRemove = i;
                         }
                         EditorGUILayout.EndHorizontal();
-                        
+
                         EditorGUILayout.BeginHorizontal();
                         GUILayout.Space(12);
                         EditorGUILayout.BeginVertical();
-                        
+
                         if (ShouldShowTypeSelector(elementType, field))
                         {
                             object newInstance = DrawTypeSelectorForElement(elementType, listItem, field);
@@ -319,7 +328,7 @@ namespace NBC.ActionEditor
                                 listItem = newInstance;
                             }
                         }
-                        
+
                         if (listItem != null)
                         {
                             object newElementValue = DrawElementValue(elementType, listItem, i);
@@ -328,12 +337,12 @@ namespace NBC.ActionEditor
                                 list[i] = newElementValue;
                             }
                         }
-                        
+
                         EditorGUILayout.EndVertical();
                         EditorGUILayout.EndHorizontal();
                         DrawDivider();
                     }
-                    
+
                     if (indexToRemove >= 0)
                     {
                         list.RemoveAt(indexToRemove);
@@ -354,7 +363,7 @@ namespace NBC.ActionEditor
             {
                 Type elementType = fieldType.GetElementType();
                 Array array = (Array)value;
-                
+
                 if (array == null)
                 {
                     array = Array.CreateInstance(elementType, 0);
@@ -364,17 +373,17 @@ namespace NBC.ActionEditor
 
                 var foldout = EditorGUILayout.Foldout(GetFoldout(array), field.GetShowName());
                 SetFoldout(array, foldout);
-                
+
                 if (foldout)
                 {
                     GUILayout.Space(6);
                     GUILayout.BeginVertical(GUI.skin.box);
-                    
+
                     int indexToRemove = -1;
                     for (int i = 0; i < array.Length; i++)
                     {
                         object arrayItem = array.GetValue(i);
-                        
+
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField($"Element {i}");
                         if (GUILayout.Button("X", GUILayout.Width(20)))
@@ -382,11 +391,11 @@ namespace NBC.ActionEditor
                             indexToRemove = i;
                         }
                         EditorGUILayout.EndHorizontal();
-                        
+
                         EditorGUILayout.BeginHorizontal();
                         GUILayout.Space(12);
                         EditorGUILayout.BeginVertical();
-                        
+
                         if (ShouldShowTypeSelector(elementType, field))
                         {
                             object newInstance = DrawTypeSelectorForElement(elementType, arrayItem, field);
@@ -396,7 +405,7 @@ namespace NBC.ActionEditor
                                 arrayItem = newInstance;
                             }
                         }
-                        
+
                         if (arrayItem != null)
                         {
                             object newElementValue = DrawElementValue(elementType, arrayItem, i);
@@ -405,12 +414,12 @@ namespace NBC.ActionEditor
                                 array.SetValue(newElementValue, i);
                             }
                         }
-                        
+
                         EditorGUILayout.EndVertical();
                         EditorGUILayout.EndHorizontal();
                         DrawDivider();
                     }
-                    
+
                     if (indexToRemove >= 0)
                     {
                         Array newArray = RemoveArrayElement(array, elementType, indexToRemove);
@@ -643,7 +652,7 @@ namespace NBC.ActionEditor
 
             return i1 - i2;
         }
-
+*/
         private bool GetFoldout(object obj)
         {
             if (obj == null) return false;
@@ -695,7 +704,7 @@ namespace NBC.ActionEditor
         private object DrawTypeSelectorForElement(Type elementType, object currentValue, FieldInfo field)
         {
             Type[] availableTypes = GetAvailableTypes(elementType, field);
-            
+
             if (availableTypes == null || availableTypes.Length == 0)
             {
                 EditorGUILayout.HelpBox($"No implementations found for {elementType.Name}", MessageType.Warning);
@@ -704,10 +713,10 @@ namespace NBC.ActionEditor
 
             Type currentType = currentValue?.GetType();
             int selectedIndex = -1;
-            
+
             string[] typeNames = new string[availableTypes.Length + 1];
             typeNames[0] = "(None)";
-            
+
             for (int i = 0; i < availableTypes.Length; i++)
             {
                 typeNames[i + 1] = availableTypes[i].Name;
@@ -746,7 +755,7 @@ namespace NBC.ActionEditor
         private Type[] GetAvailableTypes(Type baseType, FieldInfo field)
         {
             var objectTypesAttr = field.GetCustomAttribute<ObjectTypesAttribute>();
-            
+
             if (objectTypesAttr != null)
             {
                 return objectTypesAttr.types;
@@ -763,6 +772,7 @@ namespace NBC.ActionEditor
             return new Type[0];
         }
 
+        /*
         private object DrawElementValue(Type elementType, object elementValue, int index)
         {
             if (elementType == typeof(int))
@@ -829,6 +839,7 @@ namespace NBC.ActionEditor
                 {
                     curve = new AnimationCurve();
                 }
+
                 return EditorGUILayout.CurveField(curve);
             }
             else if (elementType.IsSubclassOf(typeof(Object)))
@@ -845,7 +856,7 @@ namespace NBC.ActionEditor
                 return elementValue;
             }
         }
-
+*/
         private object CreateDefaultInstance(Type type)
         {
             if (type == typeof(string))
@@ -890,7 +901,7 @@ namespace NBC.ActionEditor
         {
             int newLength = originalArray.Length - 1;
             Array newArray = Array.CreateInstance(elementType, newLength);
-            
+
             for (int i = 0, j = 0; i < originalArray.Length; i++)
             {
                 if (i != indexToRemove)
@@ -899,7 +910,7 @@ namespace NBC.ActionEditor
                     j++;
                 }
             }
-            
+
             return newArray;
         }
     }

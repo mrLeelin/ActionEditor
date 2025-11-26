@@ -11,7 +11,7 @@ namespace NBC.ActionEditor
     {
         [HideInInspector] public List<Group> groups = new();
 
-
+        [HideInInspector]
         [SerializeField] public float length;
         /*
         [SerializeField] private float viewTimeMin;
