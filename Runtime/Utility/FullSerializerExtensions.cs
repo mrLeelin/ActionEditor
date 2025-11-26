@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using FullSerializer;
 using UnityEngine;
@@ -7,11 +7,21 @@ namespace NBC.ActionEditor
 {
     public class Json
     {
+        private static fsSerializer CreateSerializer()
+        {
+            var serializer = new fsSerializer();
+            serializer.Config.SerializeAttributes = new[] { typeof(SerializeField), typeof(fsPropertyAttribute) };
+            
+            serializer.AddConverter(new fsInterfaceConverter());
+            
+            return serializer;
+        }
+
         public static string Serialize(object value, bool isCompressed = false)
         {
             try
             {
-                new fsSerializer().TrySerialize(value, out var data).AssertSuccessWithoutWarnings();
+                CreateSerializer().TrySerialize(value, out var data).AssertSuccessWithoutWarnings();
                 if (isCompressed)
                 {
                     return fsJsonPrinter.CompressedJson(data);
@@ -21,6 +31,7 @@ namespace NBC.ActionEditor
             }
             catch (Exception e)
             {
+                Debug.LogError($"Serialization error: {e}");
                 return string.Empty;
             }
         }
@@ -31,7 +42,7 @@ namespace NBC.ActionEditor
             {
                 fsData data = fsJsonParser.Parse(serializedState);
                 object deserialized = null;
-                var ser = new fsSerializer();
+                var ser = CreateSerializer();
                 ser.TryDeserialize(data, type, ref deserialized).AssertSuccessWithoutWarnings();
 
                 return deserialized;
@@ -41,7 +52,7 @@ namespace NBC.ActionEditor
 #if UNITY_EDITOR
                 File.WriteAllText($"{Application.dataPath}/../error_json.json", serializedState);
 #endif
-                Debug.LogError(e);
+                Debug.LogError($"Deserialization error for type {type.Name}: {e}");
                 return null;
             }
         }

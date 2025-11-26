@@ -146,70 +146,93 @@ namespace NBC.ActionEditor
 
         public void DrawDefaultInspector(object obj)
         {
-            var t = obj.GetType();
-            //得到字段的值,只能得到public类型的字典的值
-            FieldInfo[] fieldInfos = t.GetFields();
-            //排序一下，子类的字段在后，父类的在前
+            var objectType = obj.GetType();
+            FieldInfo[] fieldInfos = objectType.GetFields();
             Array.Sort(fieldInfos, FieldsSprtBy);
 
-            //判断需要过滤不显示的字段
-            List<FieldInfo> needShowField = new List<FieldInfo>();
-            foreach (var field in fieldInfos)
-            {
-                var need = true;
-                var attributes = field.GetCustomAttributes();
-                foreach (var attribute in attributes)
-                {
-                    if (attribute is HideInInspector hide)
-                    {
-                        need = false;
-                        break;
-                    }
+            List<FieldInfo> visibleFields = FilterVisibleFields(fieldInfos, obj);
 
-                    if (attribute is OptionRelateParamAttribute option)
-                    {
-                        var relate = Array.Find(fieldInfos, f1 => f1.Name == option.argsName);
-                        if (relate != null)
-                        {
-                            var value = relate.GetValue(obj);
-                            var index = Array.FindIndex(option.argsValue, v1 => v1.Equals(value));
-                            if (index < 0)
-                            {
-                                need = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (attribute is OptionRelateBoolAttribute boolOption)
-                    {
-                        var relate = Array.Find(fieldInfos, f1 => f1.Name == boolOption.boolFieldName);
-                        if (relate != null)
-                        {
-                            var value = relate.GetValue(obj);
-                            if (value is bool boolValue)
-                            {
-                                var index = Array.FindIndex(boolOption.boolValues, v1 => v1 == boolValue);
-                                if (index < 0)
-                                {
-                                    need = false;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (need)
-                {
-                    needShowField.Add(field);
-                }
-            }
-
-            foreach (var field in needShowField)
+            foreach (var field in visibleFields)
             {
                 FieldDefaultInspector(field, obj);
             }
+        }
+
+        private List<FieldInfo> FilterVisibleFields(FieldInfo[] fieldInfos, object obj)
+        {
+            List<FieldInfo> visibleFields = new List<FieldInfo>();
+            
+            foreach (var field in fieldInfos)
+            {
+                if (ShouldShowField(field, fieldInfos, obj))
+                {
+                    visibleFields.Add(field);
+                }
+            }
+
+            return visibleFields;
+        }
+
+        private bool ShouldShowField(FieldInfo field, FieldInfo[] allFields, object obj)
+        {
+            var attributes = field.GetCustomAttributes();
+            
+            foreach (var attribute in attributes)
+            {
+                if (attribute is HideInInspector)
+                {
+                    return false;
+                }
+
+                if (attribute is OptionRelateParamAttribute optionRelate)
+                {
+                    if (!CheckOptionRelateParam(optionRelate, allFields, obj))
+                    {
+                        return false;
+                    }
+                }
+
+                if (attribute is OptionRelateBoolAttribute boolRelate)
+                {
+                    if (!CheckOptionRelateBool(boolRelate, allFields, obj))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private bool CheckOptionRelateParam(OptionRelateParamAttribute option, FieldInfo[] allFields, object obj)
+        {
+            var relatedField = Array.Find(allFields, f => f.Name == option.argsName);
+            if (relatedField == null)
+            {
+                return true;
+            }
+
+            var fieldValue = relatedField.GetValue(obj);
+            var matchIndex = Array.FindIndex(option.argsValue, v => v.Equals(fieldValue));
+            return matchIndex >= 0;
+        }
+
+        private bool CheckOptionRelateBool(OptionRelateBoolAttribute boolOption, FieldInfo[] allFields, object obj)
+        {
+            var relatedField = Array.Find(allFields, f => f.Name == boolOption.boolFieldName);
+            if (relatedField == null)
+            {
+                return true;
+            }
+
+            var fieldValue = relatedField.GetValue(obj);
+            if (fieldValue is bool boolValue)
+            {
+                var matchIndex = Array.FindIndex(boolOption.boolValues, v => v == boolValue);
+                return matchIndex >= 0;
+            }
+
+            return true;
         }
 
         protected void FieldDefaultInspector(FieldInfo field, object obj)
@@ -254,130 +277,163 @@ namespace NBC.ActionEditor
             {
                 Type elementType = fieldType.GetGenericArguments()[0];
                 IList list = (IList)value;
-                var foldout = EditorGUILayout.Foldout(GetFoldout(value), field.GetShowName());
+                
+                if (list == null)
+                {
+                    list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
+                    field.SetValue(obj, list);
+                    newValue = list;
+                }
+                
+                var foldout = EditorGUILayout.Foldout(GetFoldout(list), field.GetShowName());
+                SetFoldout(list, foldout);
+                
                 if (foldout)
                 {
                     GUILayout.Space(6);
                     GUILayout.BeginVertical(GUI.skin.box);
-                    if (list != null)
+                    
+                    int indexToRemove = -1;
+                    for (int i = 0; i < list.Count; i++)
                     {
-                        for (int i = 0; i < list.Count; i++)
-                        {
-                            object listItem = list[i];
-                            EditorGUILayout.BeginHorizontal();
-                            EditorGUILayout.LabelField($"Element {i}");
-                            if (GUILayout.Button("X", GUILayout.Width(20)))
-                            {
-                                list.Remove(listItem);
-                                i--;
-                                continue;
-                            }
-
-                            EditorGUILayout.EndHorizontal();
-                            EditorGUILayout.BeginHorizontal();
-                            GUILayout.Space(12);
-                            EditorGUILayout.BeginVertical();
-                            DrawDefaultInspector(listItem);
-                            EditorGUILayout.EndVertical();
-                            EditorGUILayout.EndHorizontal();
-                            DrawDivider();
-                        }
-                    }
-
-                    GUILayout.Space(6);
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.FlexibleSpace();
-                    if (GUILayout.Button("+", GUILayout.Width(30)))
-                    {
-                        if (list == null)
-                        {
-                            list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
-                            field.SetValue(obj, list);
-                        }
-
-                        list.Add(Activator.CreateInstance(elementType));
-                    }
-
-                    EditorGUILayout.EndHorizontal();
-                    GUILayout.EndVertical();
-                }
-
-                SetFoldout(value, foldout);
-            }
-            // 处理数组类型
-            else if (fieldType.IsArray)
-            {
-                Type elementType = fieldType.GetElementType();
-
-                Array array = (Array)value;
-                if (array == null)
-                {
-                    array = Array.CreateInstance(elementType, 0);
-                    field.SetValue(obj, array);
-                }
-
-                var foldout = EditorGUILayout.Foldout(GetFoldout(value), field.GetShowName());
-                if (foldout)
-                {
-                    GUILayout.Space(6);
-                    GUILayout.BeginVertical(GUI.skin.box);
-                    for (int i = 0; i < array.Length; i++)
-                    {
-                        object listItem = array.GetValue(i);
+                        object listItem = list[i];
+                        
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField($"Element {i}");
-                        if (GUILayout.Button("x", GUILayout.Width(20)))
+                        if (GUILayout.Button("X", GUILayout.Width(20)))
                         {
-                            Array newArray = Array.CreateInstance(elementType, array.Length - 1);
-                            for (int j = 0, k = 0; j < array.Length; j++)
-                            {
-                                if (j != i) // 跳过被移除的元素
-                                {
-                                    newArray.SetValue(array.GetValue(j), k);
-                                    k++;
-                                }
-                            }
-
-                            RemoveFoldout(value);
-                            array = newArray;
-                            field.SetValue(obj, newArray);
-                            SetFoldout(newArray, true);
-                            break; // 退出循环以避免数组长度更改引起的冲突
+                            indexToRemove = i;
                         }
-
                         EditorGUILayout.EndHorizontal();
+                        
                         EditorGUILayout.BeginHorizontal();
                         GUILayout.Space(12);
                         EditorGUILayout.BeginVertical();
-                        DrawDefaultInspector(listItem);
+                        
+                        if (ShouldShowTypeSelector(elementType, field))
+                        {
+                            object newInstance = DrawTypeSelectorForElement(elementType, listItem, field);
+                            if (newInstance != listItem)
+                            {
+                                list[i] = newInstance;
+                                listItem = newInstance;
+                            }
+                        }
+                        
+                        if (listItem != null)
+                        {
+                            object newElementValue = DrawElementValue(elementType, listItem, i);
+                            if (newElementValue != listItem && !newElementValue.Equals(listItem))
+                            {
+                                list[i] = newElementValue;
+                            }
+                        }
+                        
                         EditorGUILayout.EndVertical();
                         EditorGUILayout.EndHorizontal();
                         DrawDivider();
                     }
+                    
+                    if (indexToRemove >= 0)
+                    {
+                        list.RemoveAt(indexToRemove);
+                    }
 
                     GUILayout.Space(6);
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
                     if (GUILayout.Button("+", GUILayout.Width(30)))
                     {
-                        Array newArray = Array.CreateInstance(elementType, array != null ? array.Length + 1 : 1);
-                        if (array != null)
-                        {
-                            array.CopyTo(newArray, 0);
-                        }
-
-                        newArray.SetValue(Activator.CreateInstance(elementType), newArray.Length - 1);
-                        RemoveFoldout(value);
-                        array = newArray;
-                        field.SetValue(obj, array);
-                        SetFoldout(newArray, true);
+                        list.Add(CreateDefaultInstance(elementType));
                     }
-
                     EditorGUILayout.EndHorizontal();
                     GUILayout.EndVertical();
                 }
+            }
+            else if (fieldType.IsArray)
+            {
+                Type elementType = fieldType.GetElementType();
+                Array array = (Array)value;
+                
+                if (array == null)
+                {
+                    array = Array.CreateInstance(elementType, 0);
+                    field.SetValue(obj, array);
+                    newValue = array;
+                }
 
-                SetFoldout(value, foldout);
+                var foldout = EditorGUILayout.Foldout(GetFoldout(array), field.GetShowName());
+                SetFoldout(array, foldout);
+                
+                if (foldout)
+                {
+                    GUILayout.Space(6);
+                    GUILayout.BeginVertical(GUI.skin.box);
+                    
+                    int indexToRemove = -1;
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        object arrayItem = array.GetValue(i);
+                        
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.LabelField($"Element {i}");
+                        if (GUILayout.Button("X", GUILayout.Width(20)))
+                        {
+                            indexToRemove = i;
+                        }
+                        EditorGUILayout.EndHorizontal();
+                        
+                        EditorGUILayout.BeginHorizontal();
+                        GUILayout.Space(12);
+                        EditorGUILayout.BeginVertical();
+                        
+                        if (ShouldShowTypeSelector(elementType, field))
+                        {
+                            object newInstance = DrawTypeSelectorForElement(elementType, arrayItem, field);
+                            if (newInstance != arrayItem)
+                            {
+                                array.SetValue(newInstance, i);
+                                arrayItem = newInstance;
+                            }
+                        }
+                        
+                        if (arrayItem != null)
+                        {
+                            object newElementValue = DrawElementValue(elementType, arrayItem, i);
+                            if (newElementValue != arrayItem && !newElementValue.Equals(arrayItem))
+                            {
+                                array.SetValue(newElementValue, i);
+                            }
+                        }
+                        
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.EndHorizontal();
+                        DrawDivider();
+                    }
+                    
+                    if (indexToRemove >= 0)
+                    {
+                        Array newArray = RemoveArrayElement(array, elementType, indexToRemove);
+                        RemoveFoldout(array);
+                        field.SetValue(obj, newArray);
+                        SetFoldout(newArray, true);
+                        newValue = newArray;
+                    }
+
+                    GUILayout.Space(6);
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button("+", GUILayout.Width(30)))
+                    {
+                        Array newArray = AddArrayElement(array, elementType);
+                        RemoveFoldout(array);
+                        field.SetValue(obj, newArray);
+                        SetFoldout(newArray, true);
+                        newValue = newArray;
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    GUILayout.EndVertical();
+                }
             }
             else if (showType == typeof(int))
             {
@@ -424,7 +480,8 @@ namespace NBC.ActionEditor
             else if (showType == typeof(Vector3))
             {
                 newValue = EditorGUILayout.Vector3Field(name, (Vector3)value);
-            }else if (showType == typeof(Quaternion))
+            }
+            else if (showType == typeof(Quaternion))
             {
                 Vector3 euler = EditorGUILayout.Vector3Field(name, ((Quaternion)value).eulerAngles);
                 newValue = Quaternion.Euler(euler);
@@ -490,6 +547,7 @@ namespace NBC.ActionEditor
                     {
                         o = AssetDatabase.LoadAssetAtPath(path, type);
                     }
+
                     GUILayout.Label(path);
                     var newObj = EditorGUILayout.ObjectField(name, o, type, false);
                     if (newObj != o)
@@ -506,15 +564,15 @@ namespace NBC.ActionEditor
                 {
                     value = Activator.CreateInstance(fieldType);
                 }
+
                 //递归渲染里面的
                 DrawDefaultInspector(value);
                 newValue = value;
                 forceSave = true;
                 EditorGUILayout.EndVertical();
             }
-            else if(DrawCustomFieldInspector(fieldType, showType, value, out newValue, name))
+            else if (DrawCustomFieldInspector(fieldType, showType, value, out newValue, name))
             {
-                
             }
             else
             {
@@ -523,7 +581,13 @@ namespace NBC.ActionEditor
             }
 
 
-            if (value != newValue || forceSave) field.SetValue(obj, newValue);
+            if (value != newValue || forceSave)
+            {
+                if (!field.IsLiteral && !field.IsInitOnly)
+                {
+                    field.SetValue(obj, newValue);
+                }
+            }
         }
 
         /// <summary>
@@ -535,7 +599,8 @@ namespace NBC.ActionEditor
         /// <param name="newValue"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        protected virtual bool DrawCustomFieldInspector(Type fieldType, Type showType, object value, out object newValue,
+        protected virtual bool DrawCustomFieldInspector(Type fieldType, Type showType, object value,
+            out object newValue,
             string name)
         {
             newValue = value;
@@ -609,6 +674,233 @@ namespace NBC.ActionEditor
             Rect rect = EditorGUILayout.GetControlRect(false, 2);
             EditorGUI.DrawRect(rect, color);
             GUILayout.Space(2);
+        }
+
+        private bool ShouldShowTypeSelector(Type elementType, FieldInfo field)
+        {
+            if (elementType.IsInterface || elementType.IsAbstract)
+            {
+                return true;
+            }
+
+            var objectTypesAttr = field.GetCustomAttribute<ObjectTypesAttribute>();
+            if (objectTypesAttr != null && objectTypesAttr.baseType != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private object DrawTypeSelectorForElement(Type elementType, object currentValue, FieldInfo field)
+        {
+            Type[] availableTypes = GetAvailableTypes(elementType, field);
+            
+            if (availableTypes == null || availableTypes.Length == 0)
+            {
+                EditorGUILayout.HelpBox($"No implementations found for {elementType.Name}", MessageType.Warning);
+                return currentValue;
+            }
+
+            Type currentType = currentValue?.GetType();
+            int selectedIndex = -1;
+            
+            string[] typeNames = new string[availableTypes.Length + 1];
+            typeNames[0] = "(None)";
+            
+            for (int i = 0; i < availableTypes.Length; i++)
+            {
+                typeNames[i + 1] = availableTypes[i].Name;
+                if (currentType == availableTypes[i])
+                {
+                    selectedIndex = i + 1;
+                }
+            }
+
+            if (selectedIndex == -1)
+            {
+                selectedIndex = 0;
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Type", GUILayout.Width(100));
+            int newIndex = EditorGUILayout.Popup(selectedIndex, typeNames);
+            EditorGUILayout.EndHorizontal();
+
+            if (newIndex != selectedIndex)
+            {
+                if (newIndex == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    Type newType = availableTypes[newIndex - 1];
+                    return CreateDefaultInstance(newType);
+                }
+            }
+
+            return currentValue;
+        }
+
+        private Type[] GetAvailableTypes(Type baseType, FieldInfo field)
+        {
+            var objectTypesAttr = field.GetCustomAttribute<ObjectTypesAttribute>();
+            
+            if (objectTypesAttr != null)
+            {
+                return objectTypesAttr.types;
+            }
+
+            if (baseType.IsInterface || baseType.IsAbstract)
+            {
+                var derivedTypes = TypeCache.GetTypesDerivedFrom(baseType)
+                    .Where(t => !t.IsAbstract && !t.IsInterface)
+                    .ToArray();
+                return derivedTypes;
+            }
+
+            return new Type[0];
+        }
+
+        private object DrawElementValue(Type elementType, object elementValue, int index)
+        {
+            if (elementType == typeof(int))
+            {
+                return EditorGUILayout.IntField((int)elementValue);
+            }
+            else if (elementType == typeof(float))
+            {
+                return EditorGUILayout.FloatField((float)elementValue);
+            }
+            else if (elementType == typeof(bool))
+            {
+                return EditorGUILayout.Toggle((bool)elementValue);
+            }
+            else if (elementType == typeof(string))
+            {
+                return EditorGUILayout.TextField((string)elementValue ?? string.Empty);
+            }
+            else if (elementType == typeof(Vector2))
+            {
+                return EditorGUILayout.Vector2Field(string.Empty, (Vector2)elementValue);
+            }
+            else if (elementType == typeof(Vector3))
+            {
+                return EditorGUILayout.Vector3Field(string.Empty, (Vector3)elementValue);
+            }
+            else if (elementType == typeof(Vector4))
+            {
+                return EditorGUILayout.Vector4Field(string.Empty, (Vector4)elementValue);
+            }
+            else if (elementType == typeof(Vector2Int))
+            {
+                return EditorGUILayout.Vector2IntField(string.Empty, (Vector2Int)elementValue);
+            }
+            else if (elementType == typeof(Vector3Int))
+            {
+                return EditorGUILayout.Vector3IntField(string.Empty, (Vector3Int)elementValue);
+            }
+            else if (elementType == typeof(Color))
+            {
+                return EditorGUILayout.ColorField((Color)elementValue);
+            }
+            else if (elementType == typeof(Quaternion))
+            {
+                Vector3 euler = EditorGUILayout.Vector3Field(string.Empty, ((Quaternion)elementValue).eulerAngles);
+                return Quaternion.Euler(euler);
+            }
+            else if (elementType == typeof(Rect))
+            {
+                return EditorGUILayout.RectField((Rect)elementValue);
+            }
+            else if (elementType == typeof(RectInt))
+            {
+                return EditorGUILayout.RectIntField((RectInt)elementValue);
+            }
+            else if (elementType == typeof(Bounds))
+            {
+                return EditorGUILayout.BoundsField((Bounds)elementValue);
+            }
+            else if (elementType == typeof(AnimationCurve))
+            {
+                AnimationCurve curve = elementValue as AnimationCurve;
+                if (curve == null)
+                {
+                    curve = new AnimationCurve();
+                }
+                return EditorGUILayout.CurveField(curve);
+            }
+            else if (elementType.IsSubclassOf(typeof(Object)))
+            {
+                return EditorGUILayout.ObjectField((Object)elementValue, elementType, false);
+            }
+            else if (elementType.IsEnum)
+            {
+                return EditorGUILayout.EnumPopup((Enum)elementValue);
+            }
+            else
+            {
+                DrawDefaultInspector(elementValue);
+                return elementValue;
+            }
+        }
+
+        private object CreateDefaultInstance(Type type)
+        {
+            if (type == typeof(string))
+            {
+                return string.Empty;
+            }
+            else if (type == typeof(AnimationCurve))
+            {
+                return new AnimationCurve();
+            }
+            else if (type.IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+            else if (type.IsArray)
+            {
+                return Array.CreateInstance(type.GetElementType(), 0);
+            }
+            else
+            {
+                try
+                {
+                    return Activator.CreateInstance(type);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        private Array AddArrayElement(Array originalArray, Type elementType)
+        {
+            int newLength = originalArray.Length + 1;
+            Array newArray = Array.CreateInstance(elementType, newLength);
+            originalArray.CopyTo(newArray, 0);
+            newArray.SetValue(CreateDefaultInstance(elementType), newLength - 1);
+            return newArray;
+        }
+
+        private Array RemoveArrayElement(Array originalArray, Type elementType, int indexToRemove)
+        {
+            int newLength = originalArray.Length - 1;
+            Array newArray = Array.CreateInstance(elementType, newLength);
+            
+            for (int i = 0, j = 0; i < originalArray.Length; i++)
+            {
+                if (i != indexToRemove)
+                {
+                    newArray.SetValue(originalArray.GetValue(i), j);
+                    j++;
+                }
+            }
+            
+            return newArray;
         }
     }
 }
