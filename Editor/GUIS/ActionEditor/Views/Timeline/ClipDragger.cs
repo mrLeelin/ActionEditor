@@ -291,6 +291,11 @@ namespace NBC.ActionEditor
             List<float> subTimes = new List<float>();
             foreach (var clipItem in NowDragClips)
             {
+                if (clipItem.IsLocked)
+                {
+                    continue;
+                }
+
                 if (DragOffsetDictionary.TryGetValue(clipItem, out var offsetTime))
                 {
                     var cursorTime = asset.SnapTime(asset.PosToTime(nowPos.x, App.Width) - offsetTime);
@@ -299,9 +304,19 @@ namespace NBC.ActionEditor
                 }
             }
 
+            if (subTimes.Count == 0)
+            {
+                eventData.StopPropagation();
+                return;
+            }
             var max = subTimes.Max();
             foreach (var clipItem in NowDragClips)
             {
+                if (clipItem.IsLocked)
+                {
+                    continue;
+                }
+
                 var newTime = asset.SnapTime(clipItem.StartTime + max);
                 clipItem.StartTime = newTime;
                 CheckBlendInOut(clipItem);
@@ -442,6 +457,11 @@ namespace NBC.ActionEditor
         private static void CheckMoveToTrack(PointerEventData eventDat, bool confirm = false)
         {
             if (App.FistSelect is not Track targetTrack) return;
+            if (targetTrack.IsLocked)
+            {
+                return;
+            }
+
             var trackItem = TimelineMiddleView.GetItem(eventDat.MousePosition);
 
             if (trackItem != null)

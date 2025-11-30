@@ -138,6 +138,7 @@ namespace NBC.ActionEditor
             }
 
             var size = GUI.skin.label.CalcSize(new GUIContent(text));
+            size.x += 10;
             if (ClipRect.width > size.x)
             {
                 var showY = TrackRect.y + (ClipRect.height - Styles.ClipBottomRectHeight) * 0.5f - size.y * 0.5f;
