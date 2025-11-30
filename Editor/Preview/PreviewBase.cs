@@ -4,22 +4,26 @@ namespace NBC.ActionEditor
 {
     public abstract class PreviewBase<T> : PreviewBase where T : IDirectable
     {
-        public T clip => (T)directable;
+        public T clip => (T)Directable;
     }
 
     public abstract class PreviewBase
     {
-        public IDirectable directable;
+        public IDirectable Directable;
         private bool _isInPreview;
+
         /// <summary>
         /// 用于预览的GameObject
         /// 地下可以挂载实例化的GameObject
         /// </summary>
         private Transform _groupBaseTransform;
 
+        private bool _lastIsBeSelect;
         protected IActionController Target { get; private set; }
-        
+
         protected Transform GroupBaseTransform => _groupBaseTransform;
+
+
         /// <summary>
         /// 是否在预览中
         /// </summary>
@@ -27,7 +31,8 @@ namespace NBC.ActionEditor
 
         public void SetTarget(IDirectable t)
         {
-            directable = t;
+            Directable = t;
+            _lastIsBeSelect = false;
         }
 
         public void SetGroupBaseTransform(Transform t) => _groupBaseTransform = t;
@@ -86,6 +91,29 @@ namespace NBC.ActionEditor
         {
         }
 
-        public abstract void Update(float time, float previousTime);
+        public void Update(float time, float previousTime)
+        {
+            _ = IsBeSelect();
+            OnUpdate(time, previousTime);
+        }
+
+        protected abstract void OnUpdate(float time, float previousTime);
+
+        public bool IsBeSelect()
+        {
+            if (Directable == null) return false;
+            var isBeSelect = App.IsSelect(Directable);
+            if (_lastIsBeSelect != isBeSelect)
+            {
+                OnSelectChange(isBeSelect);
+            }
+
+            _lastIsBeSelect = isBeSelect;
+            return isBeSelect;
+        }
+
+        protected virtual void OnSelectChange(bool isSelect)
+        {
+        }
     }
 }
