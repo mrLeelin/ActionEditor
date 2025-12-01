@@ -70,6 +70,11 @@ namespace NBC.ActionEditor
         public GameObject PreviewGroupRoot { get; private set; }
 
         /// <summary>
+        /// 所有使用的Previews
+        /// </summary>
+        public List<PreviewBase> AllPreview => _allPreview;
+
+        /// <summary>
         /// 选中的预制体
         /// </summary>
         public IActionController SelectSceneGameObject
@@ -97,6 +102,7 @@ namespace NBC.ActionEditor
         {
             App.OnOpenAsset += OnOpenAsset;
             App.OnCloseAssets += OnCloseAssets;
+            App.OnStop += OnStop;
             Track.OnAddClip += OnAddClipCallBack;
             Track.OnDeleteClip += OnDeleteClipCallBack;
             _previewHandles = new List<PreviewerSamplerBase>();
@@ -108,6 +114,25 @@ namespace NBC.ActionEditor
             App.OnCloseAssets -= OnCloseAssets;
             Track.OnAddClip -= OnAddClipCallBack;
             Track.OnDeleteClip -= OnDeleteClipCallBack;
+            App.OnStop -= OnStop;
+        }
+
+        private void OnStop()
+        {
+            if (_allPreview == null)
+            {
+                return;
+            }
+
+            foreach (var previewBase in _allPreview)
+            {
+                if (previewBase == null)
+                {
+                    continue;
+                }
+
+                previewBase.Exit(false);
+            }
         }
 
 
@@ -183,6 +208,7 @@ namespace NBC.ActionEditor
             {
                 return;
             }
+
             CurrentTime = time;
             if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
             {

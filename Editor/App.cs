@@ -21,7 +21,7 @@ namespace NBC.ActionEditor
         public static CallbackFunction OnDisable;
         public static OpenAssetFunction OnOpenAsset;
         public static CloseAssetsFunction OnCloseAssets;
-
+        private static bool _lastIsPause;
         public static Asset AssetData { get; private set; } = null;
 
         public static TextAsset TextAsset
@@ -274,7 +274,21 @@ namespace NBC.ActionEditor
         private static AssetPlayer _player => AssetPlayer.Inst;
 
         public static bool IsPlay { get; private set; }
-        public static bool IsPause { get; private set; }
+
+        public static bool IsPause
+        {
+            get => _lastIsPause;
+            set
+            {
+                if (_lastIsPause != value)
+                {
+                    OnPauseUpdate(value);
+                }
+
+                _lastIsPause = value;
+            }
+        }
+
 
         public static bool IsRange { get; set; }
 
@@ -300,10 +314,9 @@ namespace NBC.ActionEditor
         {
             if (AssetData != null)
                 _player.CurrentTime = 0;
-
-            OnStop?.Invoke();
             IsPlay = false;
             IsPause = false;
+            OnStop?.Invoke();
         }
 
         public static void StepForward()
@@ -351,6 +364,14 @@ namespace NBC.ActionEditor
 
             _player.CurrentTime += delta;
             Repaint();
+        }
+
+        private static void OnPauseUpdate(bool pause)
+        {
+            if (_player == null)
+            {
+                return;
+            }
         }
 
         #endregion
