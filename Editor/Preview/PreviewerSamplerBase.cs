@@ -6,11 +6,10 @@ namespace NBC.ActionEditor
 {
     public class PreviewerSamplerBase
     {
-
         private PreviewBase _previewBase;
         private IActionController _actionController;
         private GameObject _previewGroupRoot;
-        
+
         public virtual void SelfDestroy()
         {
             SceneView.duringSceneGui -= OnSceneGUI;
@@ -27,7 +26,7 @@ namespace NBC.ActionEditor
         /// <summary>
         /// 1.UpdateHandle
         /// </summary>
-        /// <param name="sceneView"></param>
+        /// <param name="sceneView"></param> 
         public virtual void OnSceneGUI(SceneView sceneView)
         {
             if (_previewBase == null || _actionController == null || this == null)
@@ -40,8 +39,8 @@ namespace NBC.ActionEditor
             {
                 return;
             }
-            
-            if(!_previewBase.IsInPreview)
+
+            if (!_previewBase.IsInPreview)
             {
                 UpdateHiddenHandle();
                 return;
@@ -49,7 +48,7 @@ namespace NBC.ActionEditor
 
             PaintHandle();
         }
-        
+
         public virtual void PaintHandle()
         {
         }
@@ -60,10 +59,14 @@ namespace NBC.ActionEditor
 
         protected PreviewBase GetPreviewBase() => _previewBase;
 
+        protected TClip GetClip<TClip>()
+            where TClip : IDirectable
+            => (TClip)_previewBase.Directable;
+
         protected T GetActionController<T>()
             where T : IActionController
             => (T)_actionController;
-        
+
         protected Transform GetPreviewGroupRoot() => _previewGroupRoot.transform;
     }
 }
