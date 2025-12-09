@@ -24,7 +24,7 @@ namespace NBC.ActionEditor
             Lan.Load();
             Styles.Load();
             Prefs.InitializeAssetTypes();
-          
+
             App.OnInitialize?.Invoke();
             //停止播放
             if (App.AssetData != null)
@@ -43,6 +43,7 @@ namespace NBC.ActionEditor
         #endregion
 
         #region Lifecycle
+
         void OnEnable()
         {
             App.Window = this;
@@ -51,10 +52,10 @@ namespace NBC.ActionEditor
 
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;
-            
+
             titleContent = new GUIContent(Lan.Title);
             minSize = new Vector2(500, 250);
-            
+
             InitializeAll();
         }
 
@@ -63,7 +64,7 @@ namespace NBC.ActionEditor
             App.Window = null;
             EditorSceneManager.sceneSaving -= OnWillSaveScene;
             EditorApplication.update -= OnEditorUpdate;
-            
+
             App.OnDisable?.Invoke();
             App.Stop();
             App.TextAsset = null;
@@ -71,11 +72,11 @@ namespace NBC.ActionEditor
 
         private void TryDelHandler()
         {
-            
             if (App.AssetData == null)
             {
                 return;
             }
+
             //检测 del 按钮
             var e = Event.current;
             if (e.type == EventType.KeyDown)
@@ -86,6 +87,7 @@ namespace NBC.ActionEditor
                 }
             }
         }
+
         void OnEditorUpdate()
         {
             this.UpdateViews();
@@ -93,11 +95,26 @@ namespace NBC.ActionEditor
             {
                 this.Repaint();
             }
+
             App.OnUpdate();
         }
 
         void OnGUI()
         {
+            if (Application.isPlaying)
+            {
+                //给我一句提示关闭引擎在运行
+                GUIStyle centeredBoldLabel = new GUIStyle(EditorStyles.miniLabel)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontStyle = FontStyle.Bold,
+                    fontSize = 28
+                };
+                EditorGUILayout.LabelField(Lan.RunningTitle, centeredBoldLabel,GUILayout.Height(30));
+
+                return;
+            }
+
             if (App.AssetData == null)
             {
                 // Test();
@@ -110,6 +127,7 @@ namespace NBC.ActionEditor
                 Debug.Log("MouseMove===11");
                 Repaint();
             }
+
             this.TryDelHandler();
             _timelineView.OnGUI(this.position);
             App.OnGUIEnd();

@@ -74,6 +74,8 @@ namespace NBC.ActionEditor
 
         #endregion
 
+
+        public static string RunningTitle = "请关闭引擎在打开编辑器.";
         
         //**********  Welcome *********
         public static string Title = "行为时间轴编辑器";
