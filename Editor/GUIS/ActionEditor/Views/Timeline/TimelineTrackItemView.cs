@@ -368,6 +368,21 @@ namespace NBC.ActionEditor
 
         protected void RenameContextMenuCmd()
         {
+            if (Data is Group group)
+            {
+                var popup = EditorWindow.GetWindow<RenamePopup>(true, "重命名", true);
+                popup.minSize = new Vector2(300, 100);
+                popup.maxSize = new Vector2(300, 100);
+                popup.Initialize(group.Name, newName =>
+                {
+                    if (!string.IsNullOrEmpty(newName))
+                    {
+                        group.Name = newName;
+                        App.Refresh();
+                    }
+                });
+                popup.ShowUtility();
+            }
         }
 
         private void DeleteContextMenu()
