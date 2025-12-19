@@ -19,7 +19,7 @@ namespace NBC.ActionEditor
         private Transform _groupBaseTransform;
 
         private bool _lastIsBeSelect;
-        protected IActionController Target { get; private set; }
+        protected INBCActionController Target { get; private set; }
 
         protected Transform GroupBaseTransform => _groupBaseTransform;
 
@@ -37,7 +37,7 @@ namespace NBC.ActionEditor
 
         public void SetGroupBaseTransform(Transform t) => _groupBaseTransform = t;
 
-        public void SetSelectGameObject(IActionController selectGameObject)
+        public void SetSelectGameObject(INBCActionController selectGameObject)
         {
             Target = selectGameObject;
             if (Target != null)
@@ -83,7 +83,7 @@ namespace NBC.ActionEditor
         {
         }
 
-        protected virtual void OnSetSelectTarget(IActionController target)
+        protected virtual void OnSetSelectTarget(INBCActionController target)
         {
         }
 

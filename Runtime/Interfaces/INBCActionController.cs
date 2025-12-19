@@ -2,7 +2,7 @@
 
 namespace NBC.ActionEditor
 {
-    public interface IActionController
+    public interface INBCActionController
     {
         
     }

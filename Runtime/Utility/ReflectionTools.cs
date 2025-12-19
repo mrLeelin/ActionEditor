@@ -555,9 +555,40 @@ namespace NBC.ActionEditor
             return builder.ToString();
         }
 
-        public static object CreateInstance(Type type)
+
+        public static void ReleaseInstance(object instance, GameObject target = null)
         {
-            return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
+            if (target == null)
+            {
+                return;
+            }
+            if (instance is MonoBehaviour monoBehaviour)
+            { 
+                UnityEngine.Object.DestroyImmediate(monoBehaviour);
+            }
+        }
+        public static object CreateInstance(Type type, GameObject target = null)
+        {
+            if (target == null)
+            {
+                return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
+            }
+
+            
+            var isMonoBehaviour = type.IsSubclassOf(typeof(MonoBehaviour));
+            if (isMonoBehaviour)
+            {
+                var result = target.AddComponent(type);
+                //隐藏
+                result.hideFlags = HideFlags.HideInInspector;
+
+
+                return result;
+            }
+            else
+            {
+                return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
+            }
         }
 
         public static T CreateInstance<T>()

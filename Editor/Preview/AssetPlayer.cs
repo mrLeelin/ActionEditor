@@ -40,7 +40,7 @@ namespace NBC.ActionEditor
 
         private List<IDirectableTimePointer> timePointers;
         private List<PreviewBase> _allPreview;
-        private IActionController _currentSelectGo;
+        private INBCActionController _currentSelectGo;
 
         /// <summary>
         /// 预览器
@@ -77,7 +77,7 @@ namespace NBC.ActionEditor
         /// <summary>
         /// 选中的预制体
         /// </summary>
-        public IActionController SelectSceneGameObject
+        public INBCActionController SelectSceneGameObject
         {
             get => _currentSelectGo;
             set
