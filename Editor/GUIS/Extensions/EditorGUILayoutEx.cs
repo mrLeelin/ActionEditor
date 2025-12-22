@@ -287,8 +287,7 @@ namespace XMLib
             IList objs, 
             Type objsType,
             Type[] types,
-            object[] attrs, 
-            GameObject target = null)
+            object[] attrs)
         {
             if (!objsType.IsGenericType || objsType.GenericTypeArguments.Length != 1)
             {
@@ -301,7 +300,7 @@ namespace XMLib
             if (objs == null)
             {
                 //初始化变量
-                objs = (IList)ReflectionTools.CreateInstance(objsType,target);
+                objs = (IList)ReflectionTools.CreateInstance(objsType);
             }
 
             using (var lay = new EditorGUILayout.VerticalScope("FrameBox"))
@@ -324,14 +323,14 @@ namespace XMLib
                 while (diff < 0)
                 {
                     var t = objs[objs.Count - 1];
-                    ReflectionTools.ReleaseInstance(t, target);
+                    ReflectionTools.ReleaseInstance(t);
                     objs.RemoveAt(objs.Count - 1);
                     diff++;
                 }
 
                 while (diff > 0)
                 {
-                    object subObj = ReflectionTools.CreateInstance(types[0],target);
+                    object subObj = ReflectionTools.CreateInstance(types[0]);
                     objs.Add(subObj);
                     diff--;
                 }
@@ -361,7 +360,7 @@ namespace XMLib
 
                             if (GUILayout.Button("x"))
                             {
-                                ReflectionTools.ReleaseInstance(objs[i], target);
+                                ReflectionTools.ReleaseInstance(objs[i]);
                                 objs.RemoveAt(i);
                                 i--;
                                 cnt--;
@@ -779,7 +778,7 @@ namespace XMLib
             }
         }
 
-        public static void DrawField(object target, FieldInfo fieldInfo, object fieldValue,GameObject goTarget = null)
+        public static void DrawField(object target, FieldInfo fieldInfo, object fieldValue)
         {
             ObjectTypesAttribute attr = fieldInfo.GetCustomAttribute<ObjectTypesAttribute>();
             object[] attrs = fieldInfo.GetCustomAttributes(true);
@@ -804,7 +803,7 @@ namespace XMLib
             }
             else if (typeof(IList).IsAssignableFrom(fieldInfo.FieldType))
             {
-                fieldValue = DrawObjectsWithTypes(title, (IList)fieldValue, fieldInfo.FieldType, attr.types, attrs,goTarget);
+                fieldValue = DrawObjectsWithTypes(title, (IList)fieldValue, fieldInfo.FieldType, attr.types, attrs);
             }
             else
             {
@@ -814,10 +813,10 @@ namespace XMLib
             fieldInfo.SetValue(target, fieldValue);
         }
 
-        public static void DrawField(object target, FieldInfo fieldInfo,GameObject goTarget = null)
+        public static void DrawField(object target, FieldInfo fieldInfo)
         {
             object fieldValue = fieldInfo.GetValue(target);
-            DrawField(target, fieldInfo, fieldValue,goTarget);
+            DrawField(target, fieldInfo, fieldValue);
         }
 
         public static bool MinMaxSlider(ref float minValue, ref float maxValue, float minLimit, float maxLimit,

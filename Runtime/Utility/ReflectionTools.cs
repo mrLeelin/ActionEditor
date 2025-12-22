@@ -567,28 +567,9 @@ namespace NBC.ActionEditor
                 UnityEngine.Object.DestroyImmediate(monoBehaviour);
             }
         }
-        public static object CreateInstance(Type type, GameObject target = null)
+        public static object CreateInstance(Type type)
         {
-            if (target == null)
-            {
-                return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
-            }
-
-            
-            var isMonoBehaviour = type.IsSubclassOf(typeof(MonoBehaviour));
-            if (isMonoBehaviour)
-            {
-                var result = target.AddComponent(type);
-                //隐藏
-                result.hideFlags = HideFlags.HideInInspector;
-
-
-                return result;
-            }
-            else
-            {
-                return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
-            }
+            return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
         }
 
         public static T CreateInstance<T>()
