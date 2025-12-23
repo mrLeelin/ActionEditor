@@ -22,10 +22,10 @@ namespace NBC.ActionEditor
         protected void ShowCommonInspector(bool showBaseInspector = true)
         {
             ShowErrors();
-            ShowEnableLoop();
+           
             ShowInOutControls();
             ShowBlendingControls();
-        
+            ShowEnableLoop();
             if (showBaseInspector)
             {
                 base.OnInspectorGUI();
