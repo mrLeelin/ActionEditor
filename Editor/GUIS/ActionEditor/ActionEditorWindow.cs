@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -9,6 +10,11 @@ namespace NBC.ActionEditor
         [MenuItem("NBC/Action Editor/Open Action Editor", false, 0)]
         public static void OpenDirectorWindow()
         {
+            if (Instance != null)
+            {
+                return;
+            }
+
             var window = GetWindow(typeof(ActionEditorWindow)) as ActionEditorWindow;
             if (window == null) return;
             window.Show();
@@ -16,10 +22,16 @@ namespace NBC.ActionEditor
 
         private WelcomeView _welcomeView;
         private TimelineView _timelineView;
+        private string _lastEditorTargetPath;
+        private string _lastTextAssetPath;
+
+
+        public static ActionEditorWindow Instance;
+
 
         #region Init
 
-        void InitializeAll()
+        private void InitializeAll()
         {
             Lan.Load();
             Styles.Load();
@@ -46,29 +58,35 @@ namespace NBC.ActionEditor
 
         void OnEnable()
         {
+            Instance = this;
             App.Window = this;
             EditorSceneManager.sceneSaving -= OnWillSaveScene;
             EditorSceneManager.sceneSaving += OnWillSaveScene;
-
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;
-
             titleContent = new GUIContent(Lan.Title);
             minSize = new Vector2(500, 250);
-
             InitializeAll();
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
+            AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
         }
+
 
         void OnDisable()
         {
+            Instance = null;
             App.Window = null;
             EditorSceneManager.sceneSaving -= OnWillSaveScene;
             EditorApplication.update -= OnEditorUpdate;
-
             App.OnDisable?.Invoke();
             App.Stop();
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            AssemblyReloadEvents.beforeAssemblyReload -= OnBeforeAssemblyReload;
+            AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
             App.TextAsset = null;
         }
+
 
         private void TryDelHandler()
         {
@@ -110,7 +128,7 @@ namespace NBC.ActionEditor
                     fontStyle = FontStyle.Bold,
                     fontSize = 28
                 };
-                EditorGUILayout.LabelField(Lan.RunningTitle, centeredBoldLabel,GUILayout.Height(30));
+                EditorGUILayout.LabelField(Lan.RunningTitle, centeredBoldLabel, GUILayout.Height(30));
 
                 return;
             }
@@ -137,64 +155,72 @@ namespace NBC.ActionEditor
         {
         }
 
-        #endregion
 
-        #region Test
-
-        private bool isDragging = false; // 是否正在拖动
-        private Vector2 dragStartPos; // 拖动起始位置
-        private Rect draggableRect = new Rect(50, 50, 100, 100); // 可拖动区域
-
-        void Test()
+        private void OnBeforeAssemblyReload()
         {
-            // 绘制一个可拖动的矩形
-            EditorGUI.DrawRect(draggableRect, Color.green);
+            SerializeSaveData();
+        }
 
-            Event e = Event.current;
 
-            // 检测鼠标事件
-            switch (e.type)
+        private void OnAfterAssemblyReload()
+        {
+            UnSerializeSaveData();
+        }
+
+        private void OnPlayModeStateChanged(PlayModeStateChange obj)
+        {
+            switch (obj)
             {
-                case EventType.MouseDown:
-                    // 如果鼠标在可拖动矩形内，开始拖动
-                    if (draggableRect.Contains(e.mousePosition) && e.button == 0)
-                    {
-                        isDragging = true;
-                        dragStartPos = e.mousePosition;
-                        Debug.Log("Begin Drag");
-                        e.Use(); // 使用事件，防止事件继续传播
-                    }
-
+                case PlayModeStateChange.EnteredEditMode:
+                {
+                    UnSerializeSaveData();
+                }
                     break;
-
-                case EventType.MouseDrag:
-                    // 如果正在拖动，更新矩形位置
-                    if (isDragging)
-                    {
-                        Vector2 dragDelta = e.mousePosition - dragStartPos;
-                        draggableRect.position += dragDelta; // 更新矩形位置
-                        dragStartPos = e.mousePosition; // 更新起始位置
-                        Debug.Log("Dragging: " + dragDelta);
-                        e.Use();
-                    }
-
+                case PlayModeStateChange.ExitingEditMode:
+                    SerializeSaveData();
                     break;
-
-                case EventType.MouseUp:
-                    // 鼠标抬起，结束拖动
-                    if (isDragging && e.button == 0)
-                    {
-                        isDragging = false;
-                        Debug.Log("End Drag");
-                        e.Use();
-                    }
-
+                case PlayModeStateChange.EnteredPlayMode:
+                {
+                    AssetPlayer.Inst.OnCloseAssets();
+                    AssetPlayer.Inst = null;
+                    App.TextAsset = null;
+                }
                     break;
-
-                case EventType.Repaint:
-                    // 额外操作：实时重绘界面
-                    EditorGUI.DrawRect(draggableRect, Color.green);
+                case PlayModeStateChange.ExitingPlayMode:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(obj), obj, null);
+            }
+        }
+
+
+        private void UnSerializeSaveData()
+        {
+            if (!string.IsNullOrEmpty(_lastEditorTargetPath))
+            {
+                var go = GameObject.Find(_lastEditorTargetPath);
+                if (go) AssetPlayer.Inst.SelectSceneGameObject = go.GetComponent<INBCActionController>();
+            }
+
+            if (!string.IsNullOrEmpty(_lastTextAssetPath))
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(_lastTextAssetPath);
+                if (asset) App.TextAsset = asset;
+            }
+        }
+
+        private void SerializeSaveData()
+        {
+            if (AssetPlayer.Inst.SelectSceneGameObject != null)
+            {
+                var go = ((MonoBehaviour)AssetPlayer.Inst.SelectSceneGameObject).gameObject;
+                //记录最后的选择
+                _lastEditorTargetPath = go.GetScenePath();
+            }
+
+            if (App.TextAsset != null)
+            {
+                _lastTextAssetPath = AssetDatabase.GetAssetPath(App.TextAsset);
             }
         }
 

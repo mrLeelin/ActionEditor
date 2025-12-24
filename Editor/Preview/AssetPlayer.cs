@@ -36,6 +36,10 @@ namespace NBC.ActionEditor
 
                 return _inst;
             }
+            set
+            {
+                _inst = value;
+            }
         }
 
         private List<IDirectableTimePointer> timePointers;
@@ -136,7 +140,7 @@ namespace NBC.ActionEditor
         }
 
 
-        private void OnCloseAssets()
+        public void OnCloseAssets()
         {
             timePointers = null;
             unsortedStartTimePointers = null;
