@@ -24,6 +24,7 @@ namespace NBC.ActionEditor
         private TimelineView _timelineView;
         private string _lastEditorTargetPath;
         private string _lastTextAssetPath;
+        private bool _isOpenWindow;
 
 
         public static ActionEditorWindow Instance;
@@ -58,6 +59,7 @@ namespace NBC.ActionEditor
 
         void OnEnable()
         {
+            _isOpenWindow = true;
             Instance = this;
             App.Window = this;
             EditorSceneManager.sceneSaving -= OnWillSaveScene;
@@ -75,6 +77,7 @@ namespace NBC.ActionEditor
 
         void OnDisable()
         {
+            _isOpenWindow = false;
             Instance = null;
             App.Window = null;
             EditorSceneManager.sceneSaving -= OnWillSaveScene;
@@ -158,17 +161,32 @@ namespace NBC.ActionEditor
 
         private void OnBeforeAssemblyReload()
         {
+            if (!_isOpenWindow)
+            {
+                return;
+            }
+
             SerializeSaveData();
         }
 
 
         private void OnAfterAssemblyReload()
         {
+            if (!_isOpenWindow)
+            {
+                return;
+            }
+
             UnSerializeSaveData();
         }
 
         private void OnPlayModeStateChanged(PlayModeStateChange obj)
         {
+            if (!_isOpenWindow)
+            {
+                return;
+            }
+
             switch (obj)
             {
                 case PlayModeStateChange.EnteredEditMode:

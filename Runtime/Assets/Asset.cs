@@ -11,15 +11,18 @@ namespace NBC.ActionEditor
     {
         [HideInInspector] public List<Group> groups = new();
 
-        [HideInInspector]
-        [SerializeField] public float length;
+        [HideInInspector] [SerializeField] public float length;
         /*
         [SerializeField] private float viewTimeMin;
         [SerializeField] private float viewTimeMax;
         */
 
         [SerializeField] private float rangeMin;
+
         [SerializeField] private float rangeMax;
+
+        //自定义长度
+        [SerializeField] public bool customLength;
 
 
         private float _previewLength = 5f;
@@ -83,8 +86,13 @@ namespace NBC.ActionEditor
         }
 
 
-        public void UpdateMaxTime()
+        public void UpdateMaxTime(bool force = false)
         {
+            if (!force && customLength)
+            {
+                return;
+            }
+
             var t = 0f;
             foreach (var group in groups)
             {
@@ -106,6 +114,7 @@ namespace NBC.ActionEditor
             groups.Remove(group);
             Validate();
         }
+        
 
         public void Validate()
         {
@@ -161,7 +170,18 @@ namespace NBC.ActionEditor
                 foreach (var d in directables)
                     d.OnAfterDeserialize();
 
-            UpdateMaxTime();
+            if (customLength)
+            {
+                if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+                {
+                    Length = length / Prefs.FrameRate;
+                }
+            }
+            else
+            {
+                UpdateMaxTime();
+            }
+    
         }
 
         public Group AddGroup(Type type)

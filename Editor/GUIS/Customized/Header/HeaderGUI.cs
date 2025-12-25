@@ -37,11 +37,12 @@ namespace NBC.ActionEditor
             if (customAssetHeader == null) return;
             customAssetHeader.OnGUI();
         }
+
         protected virtual void DrawAssetsHeaders()
         {
             var customAssetHeader = EditorCustomFactory.GetHeaders();
             if (customAssetHeader == null) return;
-            foreach(var header in customAssetHeader) header.OnGUI();
+            foreach (var header in customAssetHeader) header.OnGUI();
         }
 
         protected virtual void DrawNowAssetName()
@@ -76,8 +77,23 @@ namespace NBC.ActionEditor
                 GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(currentTimeStr)).x + 8));
             GUILayout.Label("/");
             var maxTimeStr = maxTime.ToString(CultureInfo.InvariantCulture);
-            GUILayout.Label(maxTimeStr, GUI.skin.textField,
-                GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(maxTimeStr)).x + 8));
+            if (App.AssetData.customLength)
+            {
+                App.AssetData.Length = (EditorGUILayout.IntField(maxTime,
+                                                 GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(maxTimeStr)).x +
+                                                                 8))
+                                             / (float)Prefs.FrameRate)
+                    ;
+            }
+            else
+            {
+                GUILayout.Label(maxTimeStr, GUI.skin.textField,
+                    GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent(maxTimeStr)).x + 8));
+            }
+
+            App.AssetData.customLength = GUILayout.Toggle(App.AssetData.customLength,
+                new GUIContent("自定义长度"), EditorStyles.toolbarButton);
+
             EditorGUILayout.EndHorizontal();
         }
 
@@ -112,8 +128,9 @@ namespace NBC.ActionEditor
             {
                 return;
             }
-            
-            AssetPlayer.Inst.SelectSceneGameObject = (INBCActionController)SafeObjectField.Draw(Lan.SelectSceneGameObject,
+
+            AssetPlayer.Inst.SelectSceneGameObject = (INBCActionController)SafeObjectField.Draw(
+                Lan.SelectSceneGameObject,
                 (MonoBehaviour)AssetPlayer.Inst.SelectSceneGameObject, true);
         }
 

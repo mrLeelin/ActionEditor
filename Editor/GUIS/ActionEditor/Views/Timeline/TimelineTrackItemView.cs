@@ -673,13 +673,16 @@ namespace NBC.ActionEditor
             menu.AddSeparator("");
             menu.AddItem(new GUIContent(Lan.OpenScriptEditor), false,
                 () => { ScriptLocator.TryOpenScriptPath(clip.GetType(), true); });
-
+            
             var previewType = AssetPlayer.Inst.FindPreviewType(clip.GetType());
             if (previewType != null)
             {
                 menu.AddItem(new GUIContent(Lan.OpenPreviewScriptEditor), false,
                     () => { ScriptLocator.TryOpenScriptPath(previewType, true); });
             }
+            menu.AddSeparator("/");
+            menu.AddItem(new GUIContent(Lan.ClipMaxLength),false, clip.ResetLengthToAssets);
+            
 
             menu.ShowAsContext();
         }

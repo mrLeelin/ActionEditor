@@ -16,8 +16,7 @@ namespace NBC.ActionEditor
         public float RangeMax { get; set; }
 
         void DeleteGroup(Group group);
-
-        void UpdateMaxTime();
+        
         void Validate();
     }
 }

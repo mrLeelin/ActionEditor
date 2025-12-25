@@ -36,10 +36,7 @@ namespace NBC.ActionEditor
 
                 return _inst;
             }
-            set
-            {
-                _inst = value;
-            }
+            set { _inst = value; }
         }
 
         private List<IDirectableTimePointer> timePointers;
@@ -316,6 +313,13 @@ namespace NBC.ActionEditor
         {
             if (PreviewGroupRoot != null)
             {
+                return;
+            }
+
+            var findScenePreviewRoot = GameObject.Find(Lan.PreviewGroupRootName);
+            if (findScenePreviewRoot != null)
+            {
+                PreviewGroupRoot = findScenePreviewRoot;
                 return;
             }
 

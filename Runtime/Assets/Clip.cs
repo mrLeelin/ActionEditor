@@ -128,12 +128,14 @@ namespace NBC.ActionEditor
 
         public virtual bool CanCrossBlend { get; }
 
-        [Button("长度铺满")]
+#if UNITY_EDITOR
         public void ResetLengthToAssets()
         {
             StartTime = 0;
             Length = Root.Length;
         }
+#endif
+    
 
         public virtual void OnBeforeSerialize()
         {

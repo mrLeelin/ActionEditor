@@ -180,6 +180,7 @@ namespace NBC.ActionEditor
         public static string EndTimeOverflowInvalid = "剪辑结束时间超出有效范围";
         public static string StartTimeOverflowInvalid = "剪辑开始时间超出可播放范围";
         public static string OpenScriptEditor = "打开脚本";
+        public static string ClipMaxLength = "最大长度";
         public static string OpenPreviewScriptEditor = "打开Preview脚本";
         public static string PreviewGroupRootName = "---PreviewGroup---";
     }
