@@ -183,5 +183,6 @@ namespace NBC.ActionEditor
         public static string ClipMaxLength = "最大长度";
         public static string OpenPreviewScriptEditor = "打开Preview脚本";
         public static string PreviewGroupRootName = "---PreviewGroup---";
+        public static string ExecuteOnce = "在循环中只执行一次";
     }
 }

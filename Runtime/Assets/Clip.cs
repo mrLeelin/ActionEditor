@@ -8,7 +8,7 @@ namespace NBC.ActionEditor
     [Serializable]
     public abstract class Clip : IClip
     {
-        [SerializeField] private bool runOnlyOnce = false;
+        [SerializeField] private ClipExecuteOnce executeOnce = ClipExecuteOnce.None;
         [SerializeField] private float startTime;
         [SerializeField] [HideInInspector] private float length = 1f;
         [SerializeField] private string name;
@@ -19,14 +19,14 @@ namespace NBC.ActionEditor
         private float _realLength = 1f;
         private bool _isBeCreateFlag;
         //======================================================
-
-        [MenuName("是否只执行一次")]
+        
         [fsIgnore]
-        public bool RunOnlyOnce
+        public ClipExecuteOnce ExecuteOnce
         {
-            get => runOnlyOnce;
-            set => runOnlyOnce = value;
+            get => executeOnce;
+            set => executeOnce = value;
         }
+        
 
         [MenuName("片段长度")]
         [fsIgnore]
@@ -49,7 +49,7 @@ namespace NBC.ActionEditor
         }
         */
 
-        public virtual bool IsValid => false;
+        public virtual bool IsValid => true;
 
         [fsIgnore] public IDirector Root => Parent?.Root;
 
@@ -135,7 +135,7 @@ namespace NBC.ActionEditor
             Length = Root.Length;
         }
 #endif
-    
+
 
         public virtual void OnBeforeSerialize()
         {
@@ -391,5 +391,22 @@ namespace NBC.ActionEditor
         {
             CrossBlendOut = value;
         }
+    }
+
+    /// <summary>
+    /// Clip允许循环的类型
+    /// </summary>
+    [System.Flags]
+    public enum ClipExecuteOnce
+    {
+        None = 0,
+        
+        Enter = 1 << 0,
+        LogicUpdate = 1 << 1,
+        Exit = 1 << 2,
+
+
+      
+        All = Enter | LogicUpdate | Exit,
     }
 }

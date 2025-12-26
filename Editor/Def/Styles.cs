@@ -50,18 +50,32 @@ namespace NBC.ActionEditor
         public static Color ClipBlendColor = new Color(144 / 255f, 144 / 255f, 144 / 255f, 0.5f);
 
         public static Color ClipSelectColor = Color.white;
-        
-        public static Color  DrawMultipleRectColor = Color.green;
-        
+
+        public static Color DrawMultipleRectColor = Color.green;
+
 
         public static GUIStyle HeaderBoxStyle => _headerBoxStyle != null
             ? _headerBoxStyle
             : _headerBoxStyle = _styleSheet.GetStyle("HeaderBox");
 
 
+        public static GUIStyle ClipBoxStyle => _styleSheet.GetStyle("box");
         public static GUIStyle WhiteBox => _styleSheet.GetStyle("WhiteBox");
         public static GUIStyle NotScrollbar => _styleSheet.GetStyle("NotScrollbar");
 
+        public static GUIStyle FoldoutStyle =>
+            new(EditorStyles.foldout)
+            {
+                fontStyle = FontStyle.Bold,
+                normal =
+                {
+                    textColor = Color.green
+                },
+                onNormal =
+                {
+                    textColor = Color.yellow
+                }
+            };
 
         // public static GUIStyle NotVerticalScrollbar { get; private set; }
         // public static GUIStyle NotHorizontalScrollbar { get; private set; }

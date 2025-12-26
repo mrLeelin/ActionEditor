@@ -13,6 +13,7 @@ namespace NBC.ActionEditor
     public class ActionClipInspector : InspectorsBase
     {
         private Clip action => (Clip)target;
+        private bool _showClipAllowLoop = false; // 折叠状态
 
         public override void OnInspectorGUI()
         {
@@ -22,10 +23,10 @@ namespace NBC.ActionEditor
         protected void ShowCommonInspector(bool showBaseInspector = true)
         {
             ShowErrors();
-           
+
             ShowInOutControls();
             ShowBlendingControls();
-            ShowEnableLoop();
+            ShowClipAllowLoopEnum();
             if (showBaseInspector)
             {
                 base.OnInspectorGUI();
@@ -179,13 +180,38 @@ namespace NBC.ActionEditor
             GUILayout.EndVertical();
         }
 
-        private void ShowEnableLoop()
+
+        private void ShowClipAllowLoopEnum()
         {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(Lan.RunOnlyOnce);
-            action.RunOnlyOnce = EditorGUILayout.Toggle(action.RunOnlyOnce);
-            GUILayout.EndHorizontal(); 
+            // 折叠标题
+
+            _showClipAllowLoop = EditorGUILayout.Foldout(_showClipAllowLoop, Lan.ExecuteOnce, Styles.FoldoutStyle);
+            if (!_showClipAllowLoop) return;
+            GUILayout.BeginVertical(Styles.ClipBoxStyle);
+            var current = action.ExecuteOnce;
+            ClipExecuteOnce[] values =
+            {
+                ClipExecuteOnce.All,
+                ClipExecuteOnce.Enter,
+                ClipExecuteOnce.LogicUpdate,
+                ClipExecuteOnce.Exit,
+            };
+            string[] labels = { "All", "Enter", "LogicUpdate", "Exit" };
+            for (int i = 0; i < values.Length; i++)
+            {
+                var selected = (current & values[i]) == values[i];
+                var newSelected = EditorGUILayout.ToggleLeft(labels[i], selected);
+                if (newSelected == selected) continue;
+                if (newSelected)
+                    current |= values[i];
+                else
+                    current &= ~values[i];
+            }
+
+            action.ExecuteOnce = current;
+            GUILayout.EndVertical();
         }
+
 
         /// <summary>
         /// 显示混合输入/输出控件
