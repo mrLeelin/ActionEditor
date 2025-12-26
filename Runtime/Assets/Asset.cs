@@ -22,6 +22,7 @@ namespace NBC.ActionEditor
         [SerializeField] private float rangeMax;
 
         //自定义长度
+        [HideInInspector]
         [SerializeField] public bool customLength;
 
 
