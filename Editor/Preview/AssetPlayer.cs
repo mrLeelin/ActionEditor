@@ -149,20 +149,33 @@ namespace NBC.ActionEditor
 
         public void OnCloseAssets()
         {
+            timePointers?.Clear();
             timePointers = null;
+
+            unsortedStartTimePointers?.Clear();
             unsortedStartTimePointers = null;
+
             if (_allPreview != null)
             {
                 foreach (var preview in _allPreview)
                 {
-                    preview.OnDestroy();
+                    preview?.OnDestroy();
                 }
+
+                _allPreview.Clear();
+                _allPreview = null;
             }
 
-            previewTypeDic.Clear();
+            previewTypeDic?.Clear();
+
+            _linkPreview?.Clear();
             _linkPreview = null;
+
             ClearAllPreviewHandles();
             DestroyPreviewAssetsRootInScene();
+
+            // 重置初始化状态
+            preInitialized = false;
         }
 
         private void OnOpenAsset(Asset asset)
@@ -357,9 +370,14 @@ namespace NBC.ActionEditor
 
         private void ClearAllPreviewHandles()
         {
+            if (_previewHandles == null)
+            {
+                return;
+            }
+
             foreach (var previewerOnObject in _previewHandles)
             {
-                previewerOnObject.SelfDestroy();
+                previewerOnObject?.SelfDestroy();
             }
 
             _previewHandles.Clear();
@@ -367,69 +385,64 @@ namespace NBC.ActionEditor
 
         private void OnDeleteClipCallBack(Clip clip)
         {
-            if (!_linkPreview.Remove(clip, out var previewBase))
+            if (_linkPreview == null || !_linkPreview.Remove(clip, out var previewBase))
             {
                 return;
             }
 
-            previewBase.OnDestroy();
-            timePointers.RemoveAll(x => x.target == previewBase);
-            unsortedStartTimePointers.RemoveAll(x => x.target == previewBase);
-            _allPreview.Remove(previewBase);
+            previewBase?.OnDestroy();
+            timePointers?.RemoveAll(x => x.target == previewBase);
+            unsortedStartTimePointers?.RemoveAll(x => x.target == previewBase);
+            _allPreview?.Remove(previewBase);
         }
 
         private void OnAddClipCallBack(Clip clip)
         {
-            var cType = clip.GetType();
-            if (!previewTypeDic.TryGetValue(cType, out var t))
-            {
-                return;
-            }
-
-            if (Activator.CreateInstance(t) is PreviewBase preview)
-            {
-                preview.SetTarget(clip);
-                preview.SetGroupBaseTransform(PreviewGroupRoot.transform);
-                preview.Initialize();
-                if (SelectSceneGameObject != null)
-                {
-                    preview.SetSelectGameObject(SelectSceneGameObject);
-                }
-
-                var p3 = new StartTimePointer(preview);
-                timePointers.Add(p3);
-                unsortedStartTimePointers.Add(p3);
-                timePointers.Add(new EndTimePointer(preview));
-                _allPreview.Add(preview);
-                _linkPreview.Add(clip, preview);
-            }
+            CreatePreviewForDirectable(clip, clip.GetType());
         }
 
         private void OnAddTrackCallBack(Track track)
         {
-            var tType = track.GetType();
-            if (!previewTypeDic.TryGetValue(tType, out var t1))
+            CreatePreviewForDirectable(track, track.GetType());
+        }
+
+        /// <summary>
+        /// 为 IDirectable 创建预览器
+        /// </summary>
+        /// <param name="directable">目标对象</param>
+        /// <param name="directableType">目标类型</param>
+        private void CreatePreviewForDirectable(IDirectable directable, Type directableType)
+        {
+            if (directable == null || directableType == null)
             {
                 return;
             }
 
-            if (Activator.CreateInstance(t1) is PreviewBase preview)
+            if (!previewTypeDic.TryGetValue(directableType, out var previewType))
             {
-                preview.SetTarget(track);
-                preview.SetGroupBaseTransform(PreviewGroupRoot.transform);
-                preview.Initialize();
-                if (SelectSceneGameObject != null)
-                {
-                    preview.SetSelectGameObject(SelectSceneGameObject);
-                }
-
-                var p3 = new StartTimePointer(preview);
-                timePointers.Add(p3);
-                unsortedStartTimePointers.Add(p3);
-                timePointers.Add(new EndTimePointer(preview));
-                _allPreview.Add(preview);
-                _linkPreview.Add(track, preview);
+                return;
             }
+
+            if (Activator.CreateInstance(previewType) is not PreviewBase preview)
+            {
+                return;
+            }
+
+            preview.SetTarget(directable);
+            preview.SetGroupBaseTransform(PreviewGroupRoot?.transform);
+            preview.Initialize();
+
+            if (SelectSceneGameObject != null)
+            {
+                preview.SetSelectGameObject(SelectSceneGameObject);
+            }
+
+            var startPointer = new StartTimePointer(preview);
+            timePointers?.Add(startPointer);
+            unsortedStartTimePointers?.Add(startPointer);
+            timePointers?.Add(new EndTimePointer(preview));
+            _allPreview?.Add(preview);
+            _linkPreview?.Add(directable, preview);
         }
 
 
