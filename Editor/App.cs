@@ -7,20 +7,29 @@ using System.Linq;
 
 namespace NBC.ActionEditor
 {
-    public delegate void CallbackFunction();
-
-    public delegate void OpenAssetFunction(Asset asset);
-
-    public delegate void CloseAssetsFunction();
-
     public static class App
     {
         private static TextAsset _textAsset;
 
-        public static CallbackFunction OnInitialize;
-        public static CallbackFunction OnDisable;
-        public static OpenAssetFunction OnOpenAsset;
-        public static CloseAssetsFunction OnCloseAssets;
+        /// <summary>
+        /// 编辑器初始化事件
+        /// </summary>
+        public static SafeEvent OnInitialize = new SafeEvent();
+
+        /// <summary>
+        /// 编辑器关闭事件
+        /// </summary>
+        public static SafeEvent OnDisable = new SafeEvent();
+
+        /// <summary>
+        /// 打开资产事件
+        /// </summary>
+        public static SafeEvent<Asset> OnOpenAsset = new SafeEvent<Asset>();
+
+        /// <summary>
+        /// 关闭资产事件
+        /// </summary>
+        public static SafeEvent OnCloseAssets = new SafeEvent();
         private static bool _lastIsPause;
         public static Asset AssetData { get; private set; } = null;
 
@@ -31,7 +40,7 @@ namespace NBC.ActionEditor
             {
                 if (_textAsset != null)
                 {
-                    OnCloseAssets?.Invoke();
+                    OnCloseAssets.Invoke();
                 }
 
                 _textAsset = value;
@@ -46,7 +55,7 @@ namespace NBC.ActionEditor
                     {
                         AssetData = asset;
                         asset.Init();
-                        OnOpenAsset?.Invoke(AssetData);
+                        OnOpenAsset.Invoke(AssetData);
                         App.Refresh();
                     }
                 }
@@ -271,8 +280,15 @@ namespace NBC.ActionEditor
 
         #region 播放相关
 
-        public static CallbackFunction OnPlay;
-        public static CallbackFunction OnStop;
+        /// <summary>
+        /// 播放开始事件
+        /// </summary>
+        public static SafeEvent OnPlay = new SafeEvent();
+
+        /// <summary>
+        /// 播放停止事件
+        /// </summary>
+        public static SafeEvent OnStop = new SafeEvent();
 
         private static AssetPlayer _player => AssetPlayer.Inst;
 
@@ -304,7 +320,7 @@ namespace NBC.ActionEditor
                 return;
             }
 
-            OnPlay?.Invoke();
+            OnPlay.Invoke();
             IsPlay = true;
         }
 
@@ -319,7 +335,7 @@ namespace NBC.ActionEditor
                 _player.CurrentTime = 0;
             IsPlay = false;
             IsPause = false;
-            OnStop?.Invoke();
+            OnStop.Invoke();
         }
 
         public static void StepForward()

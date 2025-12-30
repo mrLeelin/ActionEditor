@@ -7,17 +7,23 @@ using UnityEngine;
 namespace NBC.ActionEditor
 {
     
-    public delegate void OnAddClipCallback(Clip clip);
-    public delegate void OnDeleteClipCallback(Clip clip);
-    
     [Serializable]
     [Attachable(typeof(Group))]
     public abstract class Track : IDirectable
     {
 
         #region Static
-        public static OnAddClipCallback OnAddClip;
-        public static OnDeleteClipCallback OnDeleteClip;
+
+        /// <summary>
+        /// 添加 Clip 时触发的事件
+        /// </summary>
+        public static SafeEvent<Clip> OnAddClip = new SafeEvent<Clip>();
+
+        /// <summary>
+        /// 删除 Clip 时触发的事件
+        /// </summary>
+        public static SafeEvent<Clip> OnDeleteClip = new SafeEvent<Clip>();
+
         #endregion
         
         [SerializeField] private List<Clip> actionClips = new();
@@ -178,7 +184,7 @@ namespace NBC.ActionEditor
 
                 Root?.MarkDirty();
                 // DirectorUtility.selectedObject = newAction;
-                OnAddClip?.Invoke(newAction);
+                OnAddClip.Invoke(newAction);
             }
 
             return newAction;
@@ -196,7 +202,7 @@ namespace NBC.ActionEditor
 
                 Clips.Add(clip);
                 Root?.MarkDirty();
-                OnAddClip?.Invoke(clip);
+                OnAddClip.Invoke(clip);
             }
 
             return clip;
@@ -206,7 +212,7 @@ namespace NBC.ActionEditor
         {
             Clips.Remove(action);
             Root?.MarkDirty();
-            OnDeleteClip?.Invoke(action);
+            OnDeleteClip.Invoke(action);
         }
     }
 }
