@@ -88,7 +88,7 @@ namespace NBC.ActionEditor
             {
                 if (active == value) return;
                 active = value;
-                if (Root != null) Root?.Validate();
+                Root?.MarkDirty();
             }
         }
 
@@ -158,7 +158,7 @@ namespace NBC.ActionEditor
                 Tracks.Add(track);
 
                 Debug.Log("tracks.count=" + Tracks.Count);
-                Root?.Validate();
+                Root?.MarkDirty();
 
                 return track;
             }
@@ -184,7 +184,7 @@ namespace NBC.ActionEditor
                 tracks.Insert(index, track);
             }
 
-            Root?.Validate();
+            Root?.MarkDirty();
             return index;
         }
 
@@ -197,7 +197,7 @@ namespace NBC.ActionEditor
             //     DirectorUtility.selectedObject = null;
             // }
 
-            Root?.Validate();
+            Root?.MarkDirty();
         }
 
         public int GetTrackIndex(Track track)

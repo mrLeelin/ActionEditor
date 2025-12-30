@@ -33,9 +33,37 @@ namespace NBC.ActionEditor
         private float _previewRangeMin;
         private float _previewRangeMax = 5f;
 
+        /// <summary>
+        /// 脏标记，指示是否需要重新验证树结构
+        /// </summary>
+        private bool _isDirty = true;
+
         public Asset()
         {
             Init();
+        }
+
+        /// <summary>
+        /// 是否有待处理的验证
+        /// </summary>
+        public bool IsDirty => _isDirty;
+
+        /// <summary>
+        /// 标记数据已修改，需要在下次 ValidateIfNeeded 时重新验证
+        /// </summary>
+        public void MarkDirty()
+        {
+            _isDirty = true;
+        }
+
+        /// <summary>
+        /// 条件验证，仅在脏标记为 true 时执行验证
+        /// </summary>
+        public void ValidateIfNeeded()
+        {
+            if (!_isDirty) return;
+            _isDirty = false;
+            Validate();
         }
 
 
@@ -113,7 +141,7 @@ namespace NBC.ActionEditor
         public void DeleteGroup(Group group)
         {
             groups.Remove(group);
-            Validate();
+            MarkDirty();
         }
         
 
@@ -193,7 +221,7 @@ namespace NBC.ActionEditor
             {
                 newGroup.Name = "New Group";
                 groups.Add(newGroup);
-                Validate();
+                MarkDirty();
             }
 
             return newGroup;
@@ -209,7 +237,7 @@ namespace NBC.ActionEditor
 
             newGroup.Name = name;
             groups.Add(newGroup);
-            Validate();
+            MarkDirty();
             return newGroup;
         }
 

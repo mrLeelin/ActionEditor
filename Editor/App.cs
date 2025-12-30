@@ -82,6 +82,9 @@ namespace NBC.ActionEditor
 
         public static void OnGUIEnd()
         {
+            // 在帧结束时执行延迟验证，合并同一帧内的多次修改
+            AssetData?.ValidateIfNeeded();
+
             if (Frame > NeedForceRefreshFrame)
             {
                 NeedForceRefresh = false;

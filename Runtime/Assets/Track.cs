@@ -76,7 +76,7 @@ namespace NBC.ActionEditor
                 if (active != value)
                 {
                     active = value;
-                    if (Root != null) Root.Validate();
+                    Root?.MarkDirty();
                 }
             }
         }
@@ -176,7 +176,7 @@ namespace NBC.ActionEditor
                     newAction.EndTime = Mathf.Min(newAction.EndTime, nextAction.StartTime);
                 }
 
-                Root.Validate();
+                Root?.MarkDirty();
                 // DirectorUtility.selectedObject = newAction;
                 OnAddClip?.Invoke(newAction);
             }
@@ -195,7 +195,7 @@ namespace NBC.ActionEditor
                 }
 
                 Clips.Add(clip);
-                Root.Validate();
+                Root?.MarkDirty();
                 OnAddClip?.Invoke(clip);
             }
 
@@ -205,7 +205,7 @@ namespace NBC.ActionEditor
         public void DeleteAction(Clip action)
         {
             Clips.Remove(action);
-            Root.Validate();
+            Root?.MarkDirty();
             OnDeleteClip?.Invoke(action);
         }
     }
