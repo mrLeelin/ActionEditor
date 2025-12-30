@@ -410,7 +410,7 @@ namespace NBC.ActionEditor
                 if (EditorUtility.DisplayDialog(Lan.GroupDelete, Lan.GroupDeleteTips, Lan.TipsConfirm,
                         Lan.TipsCancel))
                 {
-                    group.Root.DeleteGroup(group);
+                    group.Root?.DeleteGroup(group);
                 }
             }
             else if (firstSelect is Track track)

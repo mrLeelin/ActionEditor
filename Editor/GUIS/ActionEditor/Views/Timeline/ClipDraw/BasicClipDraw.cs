@@ -35,6 +35,10 @@ namespace NBC.ActionEditor
             _clip = clip;
             Select = select;
             TrackRect = trackRect;
+
+            // 空引用检查：Root 为空时跳过绘制
+            if (clip.Root == null) return;
+
             StartPosX = clip.Root.TimeToPos(clip.StartTime, App.Width) + trackRect.x;
             EndPosX = clip.Root.TimeToPos(clip.EndTime, App.Width) + trackRect.x;
 

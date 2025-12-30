@@ -43,6 +43,9 @@ namespace NBC.ActionEditor
 
         void ShowInOutControls()
         {
+            // 空引用检查：Parent 为空时跳过
+            if (action.Parent == null) return;
+
             var previousClip = action.GetPreviousSibling();
             var previousTime = previousClip != null ? previousClip.EndTime : action.Parent.StartTime;
             if (action.CanCrossBlend(previousClip))

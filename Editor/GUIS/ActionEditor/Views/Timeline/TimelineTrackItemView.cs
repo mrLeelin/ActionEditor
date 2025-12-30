@@ -392,7 +392,7 @@ namespace NBC.ActionEditor
                 if (EditorUtility.DisplayDialog(Lan.GroupDelete, Lan.GroupDeleteTips, Lan.TipsConfirm,
                         Lan.TipsCancel))
                 {
-                    group.Root.DeleteGroup(group);
+                    group.Root?.DeleteGroup(group);
                 }
             }
             else if (Data is Track track)
@@ -563,6 +563,9 @@ namespace NBC.ActionEditor
             var existingCatAtt =
                 existing?.GetType().GetCustomAttributes(typeof(CategoryAttribute), true).FirstOrDefault() as
                     CategoryAttribute;
+
+            // 空引用检查：Root 为空时跳过
+            if (track.Root == null) return;
 
             var time = track.Root.PosToTime(ev.MousePosition.x - Position.x, Position.width);
             var cursorTime = track.Root.SnapTime(time);
