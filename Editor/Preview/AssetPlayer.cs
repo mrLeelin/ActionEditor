@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -21,7 +22,7 @@ namespace NBC.ActionEditor
         EndRange
     }
 
-    public class AssetPlayer
+    public class AssetPlayer : ScriptableObject
     {
         private static AssetPlayer _inst;
 
@@ -31,7 +32,10 @@ namespace NBC.ActionEditor
             {
                 if (_inst == null)
                 {
-                    _inst = new AssetPlayer();
+                    // 运行时创建 ScriptableObject，不保存到磁盘
+                    _inst = CreateInstance<AssetPlayer>();
+                    //_inst.hideFlags = HideFlags.HideAndDontSave;
+                    _inst.InitializeFields();
                 }
 
                 return _inst;
@@ -39,6 +43,10 @@ namespace NBC.ActionEditor
             set { _inst = value; }
         }
 
+        [SerializeField] private float _currentTime;  // 可序列化，支持 Undo
+        public float previousTime { get; private set; }
+
+        // 非序列化字段（运行时初始化）
         private List<IDirectableTimePointer> timePointers;
         private List<PreviewBase> _allPreview;
         private INBCActionController _currentSelectGo;
@@ -54,9 +62,6 @@ namespace NBC.ActionEditor
 
         private float playTimeMin;
         private float playTimeMax;
-        private float currentTime;
-
-        public float previousTime { get; private set; }
 
         private bool preInitialized;
 
@@ -99,18 +104,23 @@ namespace NBC.ActionEditor
         }
 
 
-        public AssetPlayer()
+        private void InitializeFields()
         {
+            // 初始化运行时字段
+            _previewHandles = new List<PreviewerSamplerBase>();
+            previewTypeDic = new Dictionary<Type, Type>();
+
+            // 注册事件
             App.OnOpenAsset += OnOpenAsset;
             App.OnCloseAssets += OnCloseAssets;
             App.OnStop += OnStop;
             Track.OnAddClip += OnAddClipCallBack;
             Track.OnDeleteClip += OnDeleteClipCallBack;
-            _previewHandles = new List<PreviewerSamplerBase>();
         }
 
-        ~AssetPlayer()
+        private void OnDestroy()
         {
+            // 反注册事件（当 ScriptableObject 被销毁时）
             App.OnOpenAsset -= OnOpenAsset;
             App.OnCloseAssets -= OnCloseAssets;
             Track.OnAddClip -= OnAddClipCallBack;
@@ -162,15 +172,24 @@ namespace NBC.ActionEditor
         }
 
         /// <summary>
-        /// 当前时间
+        /// 当前时间（支持 Undo 撤销）
         /// </summary>
         public float CurrentTime
         {
-            get => currentTime;
-            set => currentTime = Mathf.Clamp(value, 0, Length);
+            get => _currentTime;
+            set
+            {
+                if (_currentTime != value)
+                {
+                    // 记录修改以支持 Undo
+                    Undo.RecordObject(this, "改变播放时间");
+                    _currentTime = Mathf.Clamp(value, 0, Length);
+                    EditorUtility.SetDirty(this);
+                }
+            }
         }
 
-        public int CurrentFrame => Mathf.FloorToInt(currentTime * Prefs.FrameRate);
+        public int CurrentFrame => Mathf.FloorToInt(_currentTime * Prefs.FrameRate);
 
 
         public int LengthInFrames => Mathf.FloorToInt(Length * Prefs.FrameRate);
@@ -195,7 +214,7 @@ namespace NBC.ActionEditor
 
         public void Sample()
         {
-            Sample(currentTime);
+            Sample(_currentTime);
         }
 
         public Type FindPreviewType(Type type)
@@ -211,9 +230,9 @@ namespace NBC.ActionEditor
             }
 
             CurrentTime = time;
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            if (!TimeConverter.IsFrameMode)
             {
-                if ((currentTime == 0 || currentTime == Length) && previousTime == currentTime)
+                if ((_currentTime == 0 || _currentTime == Length) && previousTime == _currentTime)
                 {
                     return;
                 }
@@ -227,7 +246,7 @@ namespace NBC.ActionEditor
             }
 
 
-            if (!preInitialized && currentTime > 0 && previousTime == 0)
+            if (!preInitialized && _currentTime > 0 && previousTime == 0)
             {
                 InitializePreviewPointers();
             }
@@ -235,10 +254,10 @@ namespace NBC.ActionEditor
 
             if (timePointers != null)
             {
-                InternalSamplePointers(currentTime, previousTime);
+                InternalSamplePointers(_currentTime, previousTime);
             }
 
-            previousTime = currentTime;
+            previousTime = _currentTime;
         }
 
         public THandle CreateSampler<THandle>(PreviewBase previewBase) where THandle : PreviewerSamplerBase, new()

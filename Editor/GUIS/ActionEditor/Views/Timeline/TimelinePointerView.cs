@@ -48,7 +48,7 @@ namespace NBC.ActionEditor
             GUI.color = Color.white;
 
 
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            if (TimeConverter.IsFrameMode)
             {
                 DrawTimeStep_Frames();
             }
@@ -61,13 +61,13 @@ namespace NBC.ActionEditor
         private void DrawTimeStep_Frames()
         {
             var width = App.Width;
-            var frameRate = Prefs.FrameRate;
+            var frameRate = TimeConverter.FrameRate;
 
             var frameInfoInterval = 1000000;
             var lowMod = 1;
             var modulos = new[] { 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000 };
 
-            var viewTimeInFrames = asset.ViewTime * frameRate;
+            var viewTimeInFrames = TimeConverter.SecondsToFramesFloat(asset.ViewTime);
 
             for (var i = 0; i < modulos.Length; i++)
             {
@@ -258,9 +258,9 @@ namespace NBC.ActionEditor
             }
 
             string text;
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            if (TimeConverter.IsFrameMode)
             {
-                text = Mathf.FloorToInt(time * Prefs.FrameRate).ToString();
+                text = TimeConverter.SecondsToFrames(time).ToString();
             }
             else
             {

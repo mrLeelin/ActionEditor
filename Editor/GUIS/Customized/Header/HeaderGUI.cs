@@ -12,13 +12,13 @@ namespace NBC.ActionEditor
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
             DrawNowAssetName();
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            if (TimeConverter.IsFrameMode)
             {
-                DrawCurrentTime();
+                DrawCurrentFrame();
             }
             else
             {
-                DrawCurrentFrame();
+                DrawCurrentTime();
             }
 
             DrawSelectSceneGameObject();

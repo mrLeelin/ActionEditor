@@ -58,7 +58,7 @@ namespace NBC.ActionEditor
             }
 
             var canScale = action.CanScale();
-            var doFrames = Prefs.timeStepMode == Prefs.TimeStepMode.Frames;
+            var doFrames = TimeConverter.IsFrameMode;
 
             GUILayout.BeginVertical("box");
             GUILayout.BeginHorizontal();

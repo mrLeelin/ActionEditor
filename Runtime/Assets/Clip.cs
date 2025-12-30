@@ -270,10 +270,10 @@ namespace NBC.ActionEditor
 #if UNITY_EDITOR
         private void RealValueToCache()
         {
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            if (TimeConverter.IsFrameMode)
             {
-                startTime = Mathf.FloorToInt(_realStartTime * Prefs.FrameRate);
-                length = Mathf.FloorToInt(_realLength * Prefs.FrameRate);
+                startTime = TimeConverter.SecondsToFrames(_realStartTime);
+                length = TimeConverter.SecondsToFrames(_realLength);
             }
             else
             {
@@ -290,10 +290,10 @@ namespace NBC.ActionEditor
                 return;
             }
 
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+            if (TimeConverter.IsFrameMode)
             {
-                _realStartTime = (startTime / Prefs.FrameRate);
-                _realLength = (length / Prefs.FrameRate);
+                _realStartTime = TimeConverter.FramesToSeconds(startTime);
+                _realLength = TimeConverter.FramesToSeconds(length);
             }
             else
             {

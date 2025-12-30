@@ -357,14 +357,7 @@ namespace NBC.ActionEditor
             if (isStart)
             {
                 _limitMinTime = 0;
-                if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
-                {
-                    _limitMaxTime = clip.EndTime - 0.1f;
-                }
-                else
-                {
-                    _limitMaxTime = clip.EndTime - (1f / Prefs.FrameRate);
-                }
+                _limitMaxTime = clip.EndTime - TimeConverter.MinTimeDelta;
 
                 var prevClip = clip.GetPreviousSibling();
                 if (prevClip != null)
@@ -374,14 +367,7 @@ namespace NBC.ActionEditor
             }
             else
             {
-                if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
-                {
-                    _limitMinTime = clip.StartTime + 0.1f;
-                }
-                else
-                {
-                    _limitMinTime = clip.StartTime + (1f / Prefs.FrameRate);
-                }
+                _limitMinTime = clip.StartTime + TimeConverter.MinTimeDelta;
 
                 _limitMaxTime = int.MaxValue;
                 var nextClip = clip.GetNextSibling();
@@ -584,13 +570,13 @@ namespace NBC.ActionEditor
                 }
             }
 
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            if (TimeConverter.IsFrameMode)
             {
-                magnetSnapInterval = App.AssetData.ViewTime * 0.01f;
+                magnetSnapInterval = TimeConverter.FrameDuration;
             }
             else
             {
-                magnetSnapInterval = Mathf.FloorToInt(1f / Prefs.FrameRate);
+                magnetSnapInterval = App.AssetData.ViewTime * 0.01f;
             }
 
             magnetSnapTimesCache = result.Distinct().ToArray();

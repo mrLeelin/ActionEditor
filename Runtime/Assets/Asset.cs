@@ -173,9 +173,9 @@ namespace NBC.ActionEditor
 
             if (customLength)
             {
-                if (Prefs.timeStepMode == Prefs.TimeStepMode.Frames)
+                if (TimeConverter.IsFrameMode)
                 {
-                    Length = length / Prefs.FrameRate;
+                    Length = TimeConverter.FramesToSeconds(length);
                 }
             }
             else
@@ -225,7 +225,17 @@ namespace NBC.ActionEditor
                 foreach (var d in directables)
                     d.OnBeforeSerialize();
 
-            if (Prefs.timeStepMode == Prefs.TimeStepMode.Seconds)
+            if (TimeConverter.IsFrameMode)
+            {
+                length = TimeConverter.SecondsToFrames(Length);
+                /*
+                viewTimeMin = TimeConverter.SecondsToFrames(ViewTimeMin);
+                viewTimeMax = TimeConverter.SecondsToFrames(ViewTimeMax);
+                */
+                rangeMin = TimeConverter.SecondsToFrames(RangeMin);
+                rangeMax = TimeConverter.SecondsToFrames(RangeMax);
+            }
+            else
             {
                 length = Length;
                 /*
@@ -234,16 +244,6 @@ namespace NBC.ActionEditor
                 */
                 rangeMin = RangeMin;
                 rangeMax = RangeMax;
-            }
-            else
-            {
-                length = Mathf.FloorToInt(Length * Prefs.FrameRate);
-                /*
-                viewTimeMin = Mathf.FloorToInt(ViewTimeMin * Prefs.FrameRate);
-                viewTimeMax = Mathf.FloorToInt(ViewTimeMax * Prefs.FrameRate);
-                */
-                rangeMin = Mathf.FloorToInt(RangeMin * Prefs.FrameRate);
-                rangeMax = Mathf.FloorToInt(RangeMax * Prefs.FrameRate);
             }
             // groupStr = FullSerializerExtensions.Serialize(typeof(List<Group>), groups);
         }
