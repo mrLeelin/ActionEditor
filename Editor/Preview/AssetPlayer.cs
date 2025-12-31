@@ -43,7 +43,7 @@ namespace NBC.ActionEditor
             set { _inst = value; }
         }
 
-        [SerializeField] private float _currentTime;  // 可序列化，支持 Undo
+        [SerializeField] private float _currentTime; // 可序列化，支持 Undo
         public float previousTime { get; private set; }
 
         // 非序列化字段（运行时初始化）
@@ -101,6 +101,125 @@ namespace NBC.ActionEditor
 
                 _currentSelectGo = value;
             }
+        }
+
+
+        /// <summary>
+        /// 当前时间（支持 Undo 撤销）
+        /// </summary>
+        public float CurrentTime
+        {
+            get => _currentTime;
+            set
+            {
+                if (!Mathf.Approximately(_currentTime, value))
+                {
+                    // 记录修改以支持 Undo
+                    Undo.RecordObject(this, "改变播放时间");
+                    _currentTime = Mathf.Clamp(value, 0, Length);
+                    EditorUtility.SetDirty(this);
+                }
+            }
+        }
+
+        public int CurrentFrame => Mathf.FloorToInt(_currentTime * Prefs.FrameRate);
+
+
+        public int LengthInFrames => Mathf.FloorToInt(Length * Prefs.FrameRate);
+
+        public float Length
+        {
+            get
+            {
+                if (Asset != null)
+                {
+                    return Asset.Length;
+                }
+
+                return 0;
+            }
+        }
+
+        public bool ExitSelectGameObjectInPreview()
+        {
+            return SelectSceneGameObject != null;
+        }
+
+        public void Sample()
+        {
+            Sample(_currentTime);
+        }
+
+        public PreviewBase FindPreviewFormDirectable(IDirectable directable)
+        {
+            if (directable == null)
+            {
+                return null;
+            }
+
+            return _linkPreview.GetValueOrDefault(directable);
+        }
+
+        public Type FindPreviewType(Type type)
+        {
+            return previewTypeDic.GetValueOrDefault(type);
+        }
+
+        public void Sample(float time)
+        {
+            if (!App.IsPlay)
+            {
+                return;
+            }
+
+            CurrentTime = time;
+            if (!TimeConverter.IsFrameMode)
+            {
+                if ((_currentTime == 0 || _currentTime == Length) && previousTime == _currentTime)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (CurrentFrame < 0 || CurrentFrame > LengthInFrames)
+                {
+                    return;
+                }
+            }
+
+
+            if (!preInitialized && _currentTime > 0 && previousTime == 0)
+            {
+                InitializePreviewPointers();
+            }
+
+
+            if (timePointers != null)
+            {
+                InternalSamplePointers(_currentTime, previousTime);
+            }
+
+            previousTime = _currentTime;
+        }
+
+        public THandle CreateSampler<THandle>(PreviewBase previewBase) where THandle : PreviewerSamplerBase, new()
+        {
+            var result = new THandle();
+            result.Init(SelectSceneGameObject, previewBase, PreviewGroupRoot);
+            _previewHandles.Add(result);
+            return result;
+        }
+
+        public void DestroySampler(PreviewerSamplerBase handle)
+        {
+            if (handle == null)
+            {
+                return;
+            }
+
+            handle.SelfDestroy();
+            _previewHandles.Remove(handle);
         }
 
 
@@ -182,114 +301,6 @@ namespace NBC.ActionEditor
         {
             CreatePreviewAssetsRootInScene();
             InitializePreviewPointers();
-        }
-
-        /// <summary>
-        /// 当前时间（支持 Undo 撤销）
-        /// </summary>
-        public float CurrentTime
-        {
-            get => _currentTime;
-            set
-            {
-                if (_currentTime != value)
-                {
-                    // 记录修改以支持 Undo
-                    Undo.RecordObject(this, "改变播放时间");
-                    _currentTime = Mathf.Clamp(value, 0, Length);
-                    EditorUtility.SetDirty(this);
-                }
-            }
-        }
-
-        public int CurrentFrame => Mathf.FloorToInt(_currentTime * Prefs.FrameRate);
-
-
-        public int LengthInFrames => Mathf.FloorToInt(Length * Prefs.FrameRate);
-
-        public float Length
-        {
-            get
-            {
-                if (Asset != null)
-                {
-                    return Asset.Length;
-                }
-
-                return 0;
-            }
-        }
-
-        public bool ExitSelectGameObjectInPreview()
-        {
-            return SelectSceneGameObject != null;
-        }
-
-        public void Sample()
-        {
-            Sample(_currentTime);
-        }
-
-        public Type FindPreviewType(Type type)
-        {
-            return previewTypeDic.ContainsKey(type) ? previewTypeDic[type] : null;
-        }
-
-        public void Sample(float time)
-        {
-            if (!App.IsPlay)
-            {
-                return;
-            }
-
-            CurrentTime = time;
-            if (!TimeConverter.IsFrameMode)
-            {
-                if ((_currentTime == 0 || _currentTime == Length) && previousTime == _currentTime)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                if (CurrentFrame < 0 || CurrentFrame > LengthInFrames)
-                {
-                    return;
-                }
-            }
-
-
-            if (!preInitialized && _currentTime > 0 && previousTime == 0)
-            {
-                InitializePreviewPointers();
-            }
-
-
-            if (timePointers != null)
-            {
-                InternalSamplePointers(_currentTime, previousTime);
-            }
-
-            previousTime = _currentTime;
-        }
-
-        public THandle CreateSampler<THandle>(PreviewBase previewBase) where THandle : PreviewerSamplerBase, new()
-        {
-            var result = new THandle();
-            result.Init(SelectSceneGameObject, previewBase, PreviewGroupRoot);
-            _previewHandles.Add(result);
-            return result;
-        }
-
-        public void DestroySampler(PreviewerSamplerBase handle)
-        {
-            if (handle == null)
-            {
-                return;
-            }
-
-            handle.SelfDestroy();
-            _previewHandles.Remove(handle);
         }
 
         private void InternalSamplePointers(float currentTime, float previousTime)
