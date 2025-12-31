@@ -165,7 +165,7 @@ namespace NBC.ActionEditor
                     if (!ClipDrawer.ClipYContainsByRealRect(pos)) return;
                 }
 
-                if (App.FistSelect is Clip clip && clip.CanScale())
+                if (App.FirstSelect is Clip clip && clip.CanScale())
                 {
                     var x = eventData.MousePosition.x - Styles.TimelineLeftTotalWidth;
                     var time = asset.PosToTime(x, App.Width);
@@ -181,7 +181,7 @@ namespace NBC.ActionEditor
 
                     stretchClip = clip;
                 }
-                else if (App.FistSelect is Track track)
+                else if (App.FirstSelect is Track track)
                 {
                     if (eventData.MousePosition.x < Styles.TimelineLeftWidth)
                     {
@@ -383,7 +383,7 @@ namespace NBC.ActionEditor
             if (DragType < ItemDragType.StretchStart) return;
 
             var asset = App.AssetData;
-            var clipData = App.FistSelect as Clip;
+            var clipData = App.FirstSelect as Clip;
             if (clipData == null) return;
 
             var nowOffset = eventData.MousePosition.x;
@@ -442,7 +442,7 @@ namespace NBC.ActionEditor
 
         private static void CheckMoveToTrack(PointerEventData eventDat, bool confirm = false)
         {
-            if (App.FistSelect is not Track targetTrack) return;
+            if (App.FirstSelect is not Track targetTrack) return;
             if (targetTrack.IsLocked)
             {
                 return;

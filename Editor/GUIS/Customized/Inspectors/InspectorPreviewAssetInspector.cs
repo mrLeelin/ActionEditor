@@ -115,7 +115,7 @@ namespace NBC.ActionEditor
 
         void DoSelectionInspector()
         {
-            var data = App.FistSelect;
+            var data = App.FirstSelect;
 
             if (data == null)
             {
@@ -156,7 +156,7 @@ namespace NBC.ActionEditor
         void ShowPreliminaryInspector()
         {
             if (App.AssetData == null) return;
-            var type = App.FistSelect.GetType();
+            var type = App.FirstSelect.GetType();
             var nameAtt = type.GetCustomAttributes(typeof(NameAttribute), false).FirstOrDefault() as NameAttribute;
             var name = nameAtt != null ? nameAtt.name : type.Name.SplitCamelCase();
 

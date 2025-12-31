@@ -457,49 +457,80 @@ namespace NBC.ActionEditor
             _linkPreview = new Dictionary<IDirectable, PreviewBase>();
             previewTypeDic.Clear();
 
+            RegisterPreviewTypes();
+            CreatePreviewsForAsset();
 
-            var childs = EditorTools.GetTypeMetaDerivedFrom(typeof(PreviewBase));
-            foreach (var t in childs)
+            preInitialized = true;
+        }
+
+        /// <summary>
+        /// 注册所有预览器类型映射
+        /// </summary>
+        private void RegisterPreviewTypes()
+        {
+            var previewTypeMetadata = EditorTools.GetTypeMetaDerivedFrom(typeof(PreviewBase));
+
+            foreach (var typeMeta in previewTypeMetadata)
             {
-                var arrs = t.type.GetCustomAttributes(typeof(CustomPreviewAttribute), true);
-                foreach (var arr in arrs)
+                if (typeMeta.type.IsAbstract)
                 {
-                    if (arr is CustomPreviewAttribute c)
+                    continue;
+                }
+
+                var attributes = typeMeta.type.GetCustomAttributes(typeof(CustomPreviewAttribute), true);
+                foreach (var attribute in attributes)
+                {
+                    if (attribute is not CustomPreviewAttribute customPreview)
                     {
-                        var bindT = c.PreviewType;
-                        var iT = t.type;
-                        if (!previewTypeDic.ContainsKey(bindT))
-                        {
-                            if (!iT.IsAbstract) previewTypeDic[bindT] = iT;
-                        }
-                        else
-                        {
-                            var old = previewTypeDic[bindT];
-                            //如果不是抽象类，且是子类就更新
-                            if (!iT.IsAbstract && iT.IsSubclassOf(old))
-                            {
-                                previewTypeDic[bindT] = iT;
-                            }
-                        }
+                        continue;
+                    }
+
+                    var targetType = customPreview.PreviewType;
+                    var previewType = typeMeta.type;
+
+                    // 如果目标类型未注册，直接添加
+                    if (!previewTypeDic.TryGetValue(targetType, out var existingType))
+                    {
+                        previewTypeDic[targetType] = previewType;
+                        continue;
+                    }
+
+                    // 如果新类型是已注册类型的子类，则更新为更具体的类型
+                    if (previewType.IsSubclassOf(existingType))
+                    {
+                        previewTypeDic[targetType] = previewType;
                     }
                 }
             }
+        }
 
+        /// <summary>
+        /// 为 Asset 中的所有 Track 和 Clip 创建预览器
+        /// </summary>
+        private void CreatePreviewsForAsset()
+        {
             foreach (var group in Asset.groups.AsEnumerable().Reverse())
             {
-                if (!group.IsActive) continue;
+                if (!group.IsActive)
+                {
+                    continue;
+                }
+
                 foreach (var track in group.Tracks.AsEnumerable().Reverse())
                 {
-                    if (!track.IsActive) continue;
+                    if (!track.IsActive)
+                    {
+                        continue;
+                    }
+
                     OnAddTrackCallBack(track);
+
                     foreach (var clip in track.Clips)
                     {
                         OnAddClipCallBack(clip);
                     }
                 }
             }
-
-            preInitialized = true;
         }
     }
 }

@@ -38,28 +38,48 @@ namespace NBC.ActionEditor
             get => _textAsset;
             set
             {
-                if (_textAsset != null)
-                {
-                    OnCloseAssets.Invoke();
-                }
-
+                CloseCurrentAsset();
                 _textAsset = value;
+
                 if (_textAsset == null)
                 {
                     AssetData = null;
+                    return;
                 }
-                else
-                {
-                    var obj = Json.Deserialize(typeof(Asset), _textAsset.text);
-                    if (obj is Asset asset)
-                    {
-                        AssetData = asset;
-                        asset.Init();
-                        OnOpenAsset.Invoke(AssetData);
-                        App.Refresh();
-                    }
-                }
+
+                OpenAsset(_textAsset);
             }
+        }
+
+        /// <summary>
+        /// 关闭当前资产
+        /// </summary>
+        private static void CloseCurrentAsset()
+        {
+            if (_textAsset == null)
+            {
+                return;
+            }
+
+            OnCloseAssets.Invoke();
+        }
+
+        /// <summary>
+        /// 打开资产文件
+        /// </summary>
+        /// <param name="textAsset">要打开的资产文件</param>
+        private static void OpenAsset(TextAsset textAsset)
+        {
+            var obj = Json.Deserialize(typeof(Asset), textAsset.text);
+            if (obj is not Asset asset)
+            {
+                return;
+            }
+
+            AssetData = asset;
+            asset.Init();
+            OnOpenAsset.Invoke(AssetData);
+            Refresh();
         }
 
         public static EditorWindow Window;
@@ -76,19 +96,26 @@ namespace NBC.ActionEditor
             }
         }
 
+        /// <summary>
+        /// 保存当前资产到文件
+        /// </summary>
         public static void SaveAsset()
         {
-            if (AssetData == null) return;
+            if (AssetData == null || TextAsset == null)
+            {
+                return;
+            }
+
             AssetData.OnBeforeSerialize();
             var path = AssetDatabase.GetAssetPath(TextAsset);
             var json = Json.Serialize(AssetData);
             System.IO.File.WriteAllText(path, json);
-            App.Refresh();
-            /*
-            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-            */
+            Refresh();
         }
 
+        /// <summary>
+        /// GUI 帧结束时调用
+        /// </summary>
         public static void OnGUIEnd()
         {
             // 在帧结束时执行延迟验证，合并同一帧内的多次修改
@@ -99,14 +126,14 @@ namespace NBC.ActionEditor
                 NeedForceRefresh = false;
             }
 
-            Frame++;
-            if (Frame >= long.MaxValue)
-            {
-                Frame = 0;
-            }
+            // 帧计数器递增，溢出时重置
+            Frame = (Frame + 1) % long.MaxValue;
         }
 
 
+        /// <summary>
+        /// 每帧更新调用
+        /// </summary>
         public static void OnUpdate()
         {
             TryAutoSave();
@@ -156,7 +183,7 @@ namespace NBC.ActionEditor
         public static int SelectCount => _selectList.Count;
         private static readonly List<IDirectable> _selectList = new List<IDirectable>();
 
-        public static IDirectable FistSelect => _selectList.Count > 0 ? _selectList.First() : null;
+        public static IDirectable FirstSelect => _selectList.Count > 0 ? _selectList.First() : null;
 
         public static bool CanMultipleSelect { get; set; }
 
@@ -182,7 +209,7 @@ namespace NBC.ActionEditor
                 return;
             }
 
-            if (App.FistSelect is not Clip)
+            if (App.FirstSelect is not Clip)
             {
                 return;
             }
@@ -197,35 +224,24 @@ namespace NBC.ActionEditor
             }
         }
 
+        /// <summary>
+        /// 清除所有选中项
+        /// </summary>
         public static void ClearSelect() => _selectList.Clear();
 
+        /// <summary>
+        /// 选中指定的对象
+        /// </summary>
+        /// <param name="objs">要选中的对象数组</param>
         public static void Select(params IDirectable[] objs)
         {
-            var change = false;
-            if (objs == null)
+            if (!HasSelectionChanged(objs))
             {
-                if (_selectList.Count > 0) change = true;
-            }
-            else
-            {
-                if (objs.Length != _selectList.Count) change = true;
-                else
-                {
-                    var pickCount = 0;
-                    foreach (var obj in objs)
-                    {
-                        if (_selectList.Contains(obj)) pickCount++;
-                    }
-
-                    if (pickCount != objs.Length)
-                    {
-                        change = true;
-                    }
-                }
+                return;
             }
 
-            if (!change) return;
             _selectList.Clear();
+
             if (objs != null)
             {
                 foreach (var obj in objs)
@@ -233,22 +249,37 @@ namespace NBC.ActionEditor
                     _selectList.Add(obj);
                 }
 
-                //Selection.activeObject = CurrentInspectorPreviewAsset;
                 EditorUtility.SetDirty(CurrentInspectorPreviewAsset);
-
-                // DirectorUtility.selectedObject = FistSelect;
             }
 
-            if (_selectList.Count == 1 && _selectList[0] is not Clip)
-            {
-                CanMultipleSelect = true;
-            }
-            else
-            {
-                CanMultipleSelect = false;
-            }
+            CanMultipleSelect = _selectList.Count == 1 && _selectList[0] is not Clip;
         }
 
+        /// <summary>
+        /// 检查选择是否发生变化
+        /// </summary>
+        /// <param name="newSelection">新的选择对象数组</param>
+        /// <returns>选择是否发生变化</returns>
+        private static bool HasSelectionChanged(IDirectable[] newSelection)
+        {
+            if (newSelection == null)
+            {
+                return _selectList.Count > 0;
+            }
+
+            if (newSelection.Length != _selectList.Count)
+            {
+                return true;
+            }
+
+            return newSelection.Any(item => !_selectList.Contains(item));
+        }
+
+        /// <summary>
+        /// 判断对象是否被选中
+        /// </summary>
+        /// <param name="directable">要检查的对象</param>
+        /// <returns>是否被选中</returns>
         public static bool IsSelect(IDirectable directable)
         {
             return _selectList.Contains(directable);
@@ -261,19 +292,21 @@ namespace NBC.ActionEditor
         public static bool NeedForceRefresh { get; private set; }
         public static long NeedForceRefreshFrame { get; private set; }
 
+        /// <summary>
+        /// 标记需要强制刷新
+        /// </summary>
         public static void Refresh()
         {
             NeedForceRefresh = true;
             NeedForceRefreshFrame = Frame;
         }
 
-
+        /// <summary>
+        /// 重绘编辑器窗口
+        /// </summary>
         public static void Repaint()
         {
-            if (Window != null)
-            {
-                Window.Repaint();
-            }
+            Window?.Repaint();
         }
 
         #endregion
@@ -363,18 +396,22 @@ namespace NBC.ActionEditor
 
         private static void PlayerUpdate()
         {
-            if (_player == null) return;
-            var delta = (Time.realtimeSinceStartup - _editorPreviousTime) * Time.timeScale;
+            if (_player == null)
+            {
+                return;
+            }
 
+            var delta = (Time.realtimeSinceStartup - _editorPreviousTime) * Time.timeScale;
             _editorPreviousTime = Time.realtimeSinceStartup;
 
             _player.Sample();
 
-            if (!IsPlay) return;
+            if (!IsPlay || IsPause || AssetData == null)
+            {
+                return;
+            }
 
-            if (IsPause) return;
-
-            if (_player.CurrentTime >= App.AssetData.Length)
+            if (_player.CurrentTime >= AssetData.Length)
             {
                 _player.Sample(0);
                 _player.Sample(delta);
@@ -404,7 +441,7 @@ namespace NBC.ActionEditor
                 return;
             }
 
-            var firstSelect = App.FistSelect;
+            var firstSelect = App.FirstSelect;
             if (firstSelect is Group group)
             {
                 if (EditorUtility.DisplayDialog(Lan.GroupDelete, Lan.GroupDeleteTips, Lan.TipsConfirm,
